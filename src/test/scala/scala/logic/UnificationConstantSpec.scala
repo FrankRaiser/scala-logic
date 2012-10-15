@@ -30,7 +30,7 @@ object UnificationConstantSpec extends Specification {
     }
     "bind to an unbound variable" in new store {
       3 =:= Var("X")
-      Var("X").value must be equalTo(Some(3))
+      Var[Int]("X").value must be equalTo(Some(3))
     }
   }
 }

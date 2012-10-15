@@ -69,3 +69,19 @@ of the unifications and provides faster lookup of values, as explained by the fo
 Looking up the value of `X` for the first time requires to look up the values of `Y` and `Z`, before
 reaching the actual value 1. The two subsequent requests, however, are optimized by the variable
 store to find the value 1 in constant time. 
+
+Type Checking
+----
+
+The variable store is responsible for type-checking the variables. Unfortunately, it is not possible
+to include the string names of variables into the type-system, thus runtime type-checks are performed
+to avoid the following:
+
+    Var[Int]("X") =:= 3 // create X as Int
+    ...
+    Var[String]("X") // retrieve/re-create X as String -> throws a RuntimeException
+    
+Additionally, the type inferencer often allows omitting explicit typing of variables and otherwise
+detects errors like the following:
+
+    Var[String]("X") =:= 3 // compile-time error

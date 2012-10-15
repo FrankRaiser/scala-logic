@@ -3,7 +3,9 @@ package scala.logic
 /**
  * A typed logic variable, which registers itself with the provided store.
  */
-class Var[T](val name : String)(implicit variableStore : VariableStore) extends Term0[T] { 
+class Var[T](val name : String)
+    (implicit variableStore : VariableStore, mf : scala.reflect.Manifest[T]) 
+    extends Term0[T] { 
   
   val symbol = name
   
@@ -36,9 +38,10 @@ class Var[T](val name : String)(implicit variableStore : VariableStore) extends 
   
   override def occurs[VT](variable : Var[VT]) = this == variable
   
-  variableStore register this
+  variableStore.register(this)(mf)
 }
 
 object Var {
-  def apply[T](name : String)(implicit variableStore : VariableStore) = variableStore.provideVar[T](name) 
+  def apply[T](name : String)(implicit variableStore : VariableStore, mf : scala.reflect.Manifest[T]) = 
+    variableStore.provideVar[T](name)(mf) 
 }

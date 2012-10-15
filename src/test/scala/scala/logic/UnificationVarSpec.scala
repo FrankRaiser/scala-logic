@@ -32,7 +32,7 @@ object UnificationVarSpec extends Specification {
       Var[Int]("X") =:= Var("X") must beUnifiable
     }
     "be assigned to a store on creation" in new sampleData {
-      variableStore.allVariables must contain(x)
+      variableStore.allVariables.map(_._1) must contain(x)
     }
     "bind to a constant and evaluate to it" in new sampleData {
       (x =:= 1).isBound must beTrue
@@ -59,7 +59,7 @@ object UnificationVarSpec extends Specification {
     }
     "keep track of bound term over multiple variables" in new sampleDataBound {
       val dest = Var[Int]("Dest")
-      Var("Y") =:= Var("Z") =:= dest =:= 3 must beUnifiable
+      Var[Int]("Y") =:= Var[Int]("Z") =:= dest =:= 3 must beUnifiable
       x.isBound must beTrue
       x.value must be equalTo(Some(3))
     }

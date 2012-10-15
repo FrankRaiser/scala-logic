@@ -5,14 +5,20 @@ package scala.logic
  */
 class VariableStore {
   
-  private var variables : Map[String, Var[Any]] = Map.empty
+  private var variables : Map[String, (Var[Any], String)] = Map.empty
   
   def allVariables = variables.values
   
-  def register[T](regVar : Var[T]) = variables += (regVar.name -> regVar.asInstanceOf[Var[Any]])
+  def register[T](regVar : Var[T])(implicit mf : scala.reflect.Manifest[T]) = 
+    variables += (regVar.name -> (regVar.asInstanceOf[Var[Any]], mf.toString) )
   
-  def provideVar[T](name : String) : Var[T] = variables.get(name) match {
-    case Some(v) => v.asInstanceOf[Var[T]]
-    case _ => new Var[T](name)(this) // variable registers itself with us
-  }
+  def provideVar[T](name : String)(implicit mf : scala.reflect.Manifest[T]) : Var[T] = 
+    variables.get(name) match {
+      case Some((v, t)) =>
+        if (t.equals(mf.toString)) v.asInstanceOf[Var[T]]
+        else throw new RuntimeException("Type Error: variable " + name +
+            " was registered as " + t +
+            " and retrieved as " + mf.toString)
+      case _ => new Var[T](name)(this, mf) // variable registers itself with us
+    }
 }
