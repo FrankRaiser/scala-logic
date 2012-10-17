@@ -46,8 +46,7 @@ object UnificationVarSpec extends Specification {
       x =:= 3 must beUnifiable
       3 =:= x must beUnifiable
     }
-    "be bindable to another variable and evaluate to None" in new sampleDataBound {
-      x.isBound must beTrue
+    "be unifiable to another variable and still evaluate to None" in new sampleDataBound {
       x.value must beNone
     }
     "perform occur check during unification" in new sampleData {

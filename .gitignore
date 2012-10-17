@@ -15,4 +15,5 @@ project/plugins/project/
 # Eclipse specific
 .classpath
 .project
+.cache
 .settings/

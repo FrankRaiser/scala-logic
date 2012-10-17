@@ -3,6 +3,7 @@ package scala.logic
 /**
  * A constant is a term of arity 0, but we provide some support to
  * simply working with constants.
+ * @author Frank Raiser
  */
 case class Constant[T](val value : T) extends Term0[T] with Function0[T] {
   

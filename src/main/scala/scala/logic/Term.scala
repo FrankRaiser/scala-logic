@@ -5,6 +5,7 @@ class UnificationException[T](reason : String, term1 : Term[T], term2 : Term[T])
 /**
  * A general n-ary term. Terms that can be evaluated can be constructed by
  * extending both Term and Function0 and overriding the apply method accordingly.
+ * @author Frank Raiser
  */
 trait Term[T] { self =>
   def symbol : String
@@ -25,7 +26,13 @@ trait Term[T] { self =>
    */
   def occurs[VT](variable : Var[VT]) : Boolean = false
   
+  /** unification with other term */
   def =:= (other : Term[T]) : Term[T]
+  
+  /** returns the current term, after all variable substitutions
+   * have been applied to it.
+   */
+  def substituted : Term[T]
 }
 
 // The following code duplication is ugly, but apparently hard to avoid,
@@ -36,9 +43,11 @@ trait Term0[T] extends Term[T] {
   val arity = 0
   
   override def toString = symbol
+  
+  def substituted : Term[T] = this
 }
 
-trait Term1[T, T1] extends Term[T] {
+trait Term1[T, T1] extends Term[T] { self =>
   val arity = 1
   
   def arg1 : Term[T1]
@@ -58,9 +67,14 @@ trait Term1[T, T1] extends Term[T] {
   }
   
   override def occurs[VT](variable : Var[VT]) = arg1 occurs variable
+  
+  def substituted : Term[T] = new Term1[T, T1]() {
+    val symbol = self.symbol
+    val arg1 = self.arg1.substituted
+  }
 }
 
-trait Term2[T, T1, T2] extends Term[T] {
+trait Term2[T, T1, T2] extends Term[T] { self =>
   val arity = 2
   
   def arg1 : Term[T1]
@@ -83,9 +97,15 @@ trait Term2[T, T1, T2] extends Term[T] {
   
   override def occurs[VT](variable : Var[VT]) = 
     (arg1 occurs variable) || (arg2 occurs variable)
+    
+  def substituted : Term[T] = new Term2[T, T1, T2]() {
+    val symbol = self.symbol
+    val arg1 = self.arg1.substituted
+    val arg2 = self.arg2.substituted
+  }
 }
 
-trait Term3[T, T1, T2, T3] extends Term[T] {
+trait Term3[T, T1, T2, T3] extends Term[T] { self =>
   val arity = 3
   
   def arg1 : Term[T1]
@@ -110,4 +130,11 @@ trait Term3[T, T1, T2, T3] extends Term[T] {
   
   override def occurs[VT](variable : Var[VT]) = 
     (arg1 occurs variable) || (arg2 occurs variable) || (arg3 occurs variable)
+    
+  def substituted = new Term3[T, T1, T2, T3]() {
+    val symbol = self.symbol
+    val arg1 = self.arg1.substituted
+    val arg2 = self.arg2.substituted
+    val arg3 = self.arg3.substituted
+  }
 }

@@ -2,9 +2,8 @@ scala-logic
 ===========
 
 scala-logic is a library for logic variables support in Scala. 
-It is currently in its very early development stage, so don't hold your breath.
 
-The library will supported typed logic variables and support for unification. It does not
+The library supports typed logic variables, general terms, and unification. It does not
 add a full-fledged Prolog-like search engine or constraint solving engine, but rather acts
 as a core library if one wanted to implement these.
 
@@ -85,3 +84,22 @@ Additionally, the type inferencer often allows omitting explicit typing of varia
 detects errors like the following:
 
     Var[String]("X") =:= 3 // compile-time error
+    
+License
+=======
+
+scala-logic is released under the Apache 2.0 license (see LICENSE file for more information)
+
+   Copyright 2012 Frank Raiser
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.

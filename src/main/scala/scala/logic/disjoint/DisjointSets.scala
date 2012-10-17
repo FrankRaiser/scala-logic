@@ -11,7 +11,7 @@ import scala.annotation.tailrec
  * find the representative of a disjoint-set by a given element of
  * the set.
  * 
- * @todo make the class iterable to iterate through the representatives
+ * @author Frank Raiser
  */
 class DisjointSets[T](initialElements : Seq[T] = Nil) {
 

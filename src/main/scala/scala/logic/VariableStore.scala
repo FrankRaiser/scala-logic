@@ -1,16 +1,23 @@
 package scala.logic
 
+import scala.logic.disjoint.DisjointSets
+
 /**
  * A variable store keeps track of a set of variables and its unifications.
+ * @author Frank Raiser
  */
 class VariableStore {
   
   private var variables : Map[String, (Var[Any], String)] = Map.empty
   
+  val disjointSets = new DisjointSets[Var[Any]]
+  
   def allVariables = variables.values
   
-  def register[T](regVar : Var[T])(implicit mf : scala.reflect.Manifest[T]) = 
+  def register[T](regVar : Var[T])(implicit mf : scala.reflect.Manifest[T]) = {
+    disjointSets add regVar.asInstanceOf[Var[Any]]
     variables += (regVar.name -> (regVar.asInstanceOf[Var[Any]], mf.toString) )
+  }
   
   def provideVar[T](name : String)(implicit mf : scala.reflect.Manifest[T]) : Var[T] = 
     variables.get(name) match {
