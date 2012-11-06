@@ -1,4 +1,4 @@
-scala-logic
+scala-logic [![Build Status](https://travis-ci.org/FrankRaiser/scala-logic.png)](https://travis-ci.org/FrankRaiser/scala-logic)
 ===========
 
 scala-logic is a library for logic variables and quantifier-free formulae support in Scala. 
