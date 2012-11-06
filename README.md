@@ -1,11 +1,13 @@
 scala-logic
 ===========
 
-scala-logic is a library for logic variables support in Scala. 
+scala-logic is a library for logic variables and quantifier-free formulae support in Scala. 
 
 The library supports typed logic variables, general terms, and unification. It does not
 add a full-fledged Prolog-like search engine or constraint solving engine, but rather acts
 as a core library if one wanted to implement these.
+
+It further provides a simple constraint-like support for standard operators.
 
 Usage
 =====
@@ -84,6 +86,26 @@ Additionally, the type inferencer often allows omitting explicit typing of varia
 detects errors like the following:
 
     Var[String]("X") =:= 3 // compile-time error
+    
+Simplified Term Construction
+----
+
+TODO - not implemented yet
+The variable store can be used together with the Term object to simplify construction of terms:
+
+    Term.parse("f(g(X, a), h(Y, Z, 3))")
+    
+The above example requires an implicit variable store for looking up X,Y, and Z. It will
+create the corresponding Term2 and Term3 objects as well as Constant objects for 'a' and 3.
+    
+Term Store
+====
+
+In contrast to the variable store, the term store stores several terms, which logically correspond to
+a conjunction. Term simplification is performed when adding new terms to the store, as seen in the
+following examples:
+
+    TODO term store and examples not yet implemented
     
 License
 =======

@@ -10,7 +10,7 @@ class VariableStore {
   
   private var variables : Map[String, (Var[Any], String)] = Map.empty
   
-  val disjointSets = new DisjointSets[Var[Any]]
+  val disjointSets = new DisjointSets[Var[Any]](Nil)
   
   def allVariables = variables.values
   
