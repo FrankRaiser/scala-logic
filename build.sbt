@@ -15,11 +15,12 @@ scalacOptions in ThisBuild ++= Seq(
 
 // specs2 library
 libraryDependencies ++= Seq(
-   "org.specs2" %% "specs2" % "1.12" % "test",
+   "org.specs2" %% "specs2" % "1.12.2" % "test" cross CrossVersion.full,
    "junit" % "junit" % "4.7"
  )
 
 resolvers ++= Seq("snapshots" at "http://scala-tools.org/repo-snapshots",
                   "releases"  at "http://scala-tools.org/repo-releases",
+                  "sonatype releases" at "http://oss.sonatype.org/content/repositories/releases",
                   "Typesafe Repository" at "http://repo.typesafe.com/typesafe/releases/")
 
