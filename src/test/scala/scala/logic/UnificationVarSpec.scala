@@ -70,7 +70,7 @@ object UnificationVarSpec extends Specification {
       x.isGround must beFalse
       y.isGround must beFalse
     }
-    "be ground if bound to a contant" in new sampleData {
+    "be ground if bound to a constant" in new sampleData {
       (x =:= 3).isGround must beTrue
     }
     "be ground if bound to a ground variable" in new sampleDataBound {

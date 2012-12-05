@@ -12,6 +12,13 @@ case class Constant[T](val value : T) extends Term0[T] with Function0[T] {
   def isGround = true
   
   override lazy val apply = value
+  
+  override val toString = value.toString
+  
+  override def equals(other : Any) = other match {
+    case c : Constant[_] => value == c.value
+    case _ => false
+  }
 
   def =:=(other : Term[T]) = other match {
     case c : Constant[_] if c.value != value =>

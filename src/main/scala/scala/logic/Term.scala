@@ -42,7 +42,7 @@ trait Term[T] { self =>
 trait Term0[T] extends Term[T] {
   val arity = 0
   
-  override def toString = symbol
+  override def toString = symbol 
   
   def substituted : Term[T] = this
 }
@@ -55,6 +55,11 @@ trait Term1[T, T1] extends Term[T] { self =>
   def isGround = arg1.isGround
   
   override def toString = symbol + "(" + arg1 + ")"
+  
+  override def equals(other : Any) = other match {
+    case t : Term1[_,_] => symbol == t.symbol && arg1 == t.arg1
+    case _ => false
+  }
   
   def =:= (other : Term[T]) = other match {
     case v : Var[_] =>
@@ -83,6 +88,11 @@ trait Term2[T, T1, T2] extends Term[T] { self =>
   def isGround = arg1.isGround && arg2.isGround
   
   override def toString = symbol + "(" + arg1 + "," + arg2 + ")"
+  
+  override def equals(other : Any) = other match {
+    case t : Term2[_,_,_] => symbol == t.symbol && arg1 == t.arg1 && arg2 == t.arg2
+    case _ => false
+  }
   
   def =:= (other: Term[T]) = other match {
     case v : Var[_] =>
@@ -115,6 +125,12 @@ trait Term3[T, T1, T2, T3] extends Term[T] { self =>
   def isGround = arg1.isGround && arg2.isGround && arg3.isGround
   
   override def toString = symbol + "(" + arg1 + "," + arg2 + "," + arg3 + ")"
+  
+  override def equals(other : Any) = other match {
+    case t : Term3[_,_,_,_] => symbol == t.symbol && 
+    		arg1 == t.arg1 && arg2 == t.arg2 && arg3 == t.arg3
+    case _ => false
+  }
   
   def =:= (other: Term[T]) = other match {
     case v : Var[_] =>

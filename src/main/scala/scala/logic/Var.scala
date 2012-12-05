@@ -24,6 +24,19 @@ class Var[T](val name : String)
   
   def isGround = getTerm.map(_.isGround) == Some(true)
   
+  /**
+   * Equality check of variables: handle with extreme care!
+   * Due to the need to access the disjoint sets datastructure in
+   * order to determine the actual bound term, we cannot compare for
+   * it with this method, as this would lead to an infinite recursion.
+   * Instead, this only compares the variable symbol!
+   */
+  override def equals(other : Any) = other match {
+    case v : Var[_] => 
+      v.symbol == symbol
+    case _ => false
+  }
+  
   def value : Option[T] = getTerm match {
     case Some(t) if t.isInstanceOf[Function0[_]] => Some(t.asInstanceOf[Function0[T]]())
     case _ => None

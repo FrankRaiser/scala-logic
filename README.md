@@ -1,4 +1,4 @@
-scala-logic [![Build Status](https://travis-ci.org/FrankRaiser/scala-logic.png)](https://travis-ci.org/FrankRaiser/scala-logic)
+scala-logic [![Build Status](https://travis-ci.org/FrankRaiser/scala-logic.png)](https://travis-ci.org/FrankRaiser/scala)
 ===========
 
 scala-logic is a library for logic variables and quantifier-free formulae support in Scala. 
@@ -12,8 +12,10 @@ It further provides a simple constraint-like support for standard operators.
 Usage
 =====
 
-Creating logic variables
+Logic Variables
 ----
+
+### Creation ###
 
 Logic variables can be created simply as follows:
 
@@ -23,8 +25,7 @@ Variables are stored in an implicit variable store, which keeps track of all per
 Hence, another call of the above code would result in the same object being returned, as there can
 only be one variable `X` in a store.
 
-Unification
-----
+### Unification ###
 
 A logic variable can be bound to a term as follows:   
 
@@ -38,6 +39,8 @@ A logic variable can be bound to a term as follows:
    
 Terms
 ----
+
+### Creation ###
 
 A term can be created via the TermN (analogous to FunctionN) traits as follows:
 
@@ -57,7 +60,7 @@ Terms can also be evaluatable to their type as follows:
 Variables and constants are also Term0 instances.
 
 Variable store
-====
+----
 
 All variables are assigned to an implicit variable store at their creation. This store keeps track
 of the unifications and provides faster lookup of values, as explained by the following example:
@@ -69,10 +72,10 @@ of the unifications and provides faster lookup of values, as explained by the fo
    
 Looking up the value of `X` for the first time requires to look up the values of `Y` and `Z`, before
 reaching the actual value 1. The two subsequent requests, however, are optimized by the variable
-store to find the value 1 in constant time. 
+store to find the value 1 in constant time (implementation is based on disjoint sets with union-by-rank
+and path compression optimizations). 
 
-Type Checking
-----
+### Type Checking ###
 
 The variable store is responsible for type-checking the variables. Unfortunately, it is not possible
 to include the string names of variables into the type-system, thus runtime type-checks are performed
@@ -90,16 +93,32 @@ detects errors like the following:
 Simplified Term Construction
 ----
 
-TODO - not implemented yet
 The variable store can be used together with the Term object to simplify construction of terms:
 
-    Term.parse("f(g(X, a), h(Y, Z, 3))")
+    TermParser.parse("f(g(X, a), h(Y, Z, 3))")
+    
+After importing the main package, an implicit conversion is available, which makes the construction
+even simpler:
+
+    import scala.logic._
+    ...
+    "f(g(X, a), h(Y, Z, 3))".asTerm
     
 The above example requires an implicit variable store for looking up X,Y, and Z. It will
 create the corresponding Term2 and Term3 objects as well as Constant objects for 'a' and 3.
+
+### Typing Restriction ###
+
+Simplifying the term construction via strings undermines the type system, hence, the
+constructed terms will all be instances of Term[Any]. As terms are invariant (due to unification)
+this effectively eliminates static type-checking on these terms.
+
+    "f(3)".asTerm =:= Var[Int]("X") // compile error
+    "f(3)".asTerm =:= Var[Any]("X") // compiles, but X is effectively untyped
+    "f(3)".asTerm =:= Var("X") // same as Var[Any]    
     
 Term Store
-====
+----
 
 In contrast to the variable store, the term store stores several terms, which logically correspond to
 a conjunction. Term simplification is performed when adding new terms to the store, as seen in the
