@@ -116,16 +116,7 @@ this effectively eliminates static type-checking on these terms.
     "f(3)".asTerm =:= Var[Int]("X") // compile error
     "f(3)".asTerm =:= Var[Any]("X") // compiles, but X is effectively untyped
     "f(3)".asTerm =:= Var("X") // same as Var[Any]    
-    
-Term Store
-----
 
-In contrast to the variable store, the term store stores several terms, which logically correspond to
-a conjunction. Term simplification is performed when adding new terms to the store, as seen in the
-following examples:
-
-    TODO term store and examples not yet implemented
-    
 License
 =======
 

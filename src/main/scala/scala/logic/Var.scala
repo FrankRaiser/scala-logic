@@ -16,8 +16,8 @@ class Var[T](val name : String)
   /** computes the actual term, in case the variable was unified with others and 
    * they hold the actual term (more precisely, *they* is the root of the disjoint sets) */
   def getTerm : Option[Term[T]] = 
-    variableStore.disjointSets
-      .find(this.asInstanceOf[Var[Any]])
+    variableStore
+      .getSetRepresentative(this.asInstanceOf[Var[Any]])
       .flatMap(_.asInstanceOf[Var[T]].boundTerm)
   
   def isBound = getTerm.isDefined
@@ -43,12 +43,12 @@ class Var[T](val name : String)
   }
   
   def =:=(other : Term[T]) : Var[T] = {
-    val root1 = variableStore.disjointSets.find(this.asInstanceOf[Var[Any]])
+    val root1 = variableStore.getSetRepresentative(this.asInstanceOf[Var[Any]])
           .getOrElse(throw new RuntimeException("Internal error: variable root missing in variable store"))
     val root1T = root1.asInstanceOf[Var[T]]
     other match {
       case v if v.isInstanceOf[Var[_]] =>
-        val root2 = variableStore.disjointSets.find(other.asInstanceOf[Var[Any]])
+        val root2 = variableStore.getSetRepresentative(other.asInstanceOf[Var[Any]])
           .getOrElse(throw new RuntimeException("Internal error: variable root missing in variable store"))
         // find representatives of disjoint set
         if (root1 == root2) {
@@ -59,21 +59,21 @@ class Var[T](val name : String)
           // if we made it to this point, then both bound terms
           // could be successfully unified, so we can unify the
           // variables themselves
-          variableStore.disjointSets.union(root1, root2).asInstanceOf[Var[T]]
+          variableStore.union(root1, root2).asInstanceOf[Var[T]]
         } else if (root1.isBound && !root2.isBound) {
           if (root1.occurs(root2)) {
             throw new UnificationException("Variable must not occur in a term it is unified with", root1, root2)
           }
           root2.boundTerm = root1.boundTerm
-          variableStore.disjointSets.union(root1, root2).asInstanceOf[Var[T]]
+          variableStore.union(root1, root2).asInstanceOf[Var[T]]
         } else if (!root1.isBound && root2.isBound) {
           if (root2.occurs(root1)) {
             throw new UnificationException("Variable must not occur in a term it is unified with", root1, root2)
           }
           root1.boundTerm = root2.boundTerm
-          variableStore.disjointSets.union(root1, root2).asInstanceOf[Var[T]]
+          variableStore.union(root1, root2).asInstanceOf[Var[T]]
         } else { // both unbound
-          val res = variableStore.disjointSets.union(root1, root2).asInstanceOf[Var[T]]
+          val res = variableStore.union(root1, root2).asInstanceOf[Var[T]]
           if (res == root1) {
             root2.boundTerm = Some(root1)
           } else {

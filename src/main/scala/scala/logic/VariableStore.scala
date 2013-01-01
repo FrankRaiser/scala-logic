@@ -10,12 +10,20 @@ class VariableStore {
   
   private var variables : Map[String, (Var[Any], String)] = Map.empty
   
-  val disjointSets = new DisjointSets[Var[Any]](Nil)
+  private var disjointSets = new DisjointSets[Var[Any]](Map.empty)
+  
+  def getSetRepresentative(v : Var[Any]) : Option[Var[Any]] = disjointSets.find(v)
+  
+  def union(var1 : Var[Any], var2 : Var[Any]) : Var[Any] = synchronized {
+    disjointSets = disjointSets union (var1, var2)
+    getSetRepresentative(var1).getOrElse(
+        throw new RuntimeException("Variable lost from disjoint set during union"))
+  }
   
   def allVariables = variables.values
   
   def register[T](regVar : Var[T])(implicit mf : scala.reflect.Manifest[T]) = {
-    disjointSets add regVar.asInstanceOf[Var[Any]]
+    disjointSets = disjointSets add regVar.asInstanceOf[Var[Any]]
     variables += (regVar.name -> (regVar.asInstanceOf[Var[Any]], mf.toString) )
   }
   
