@@ -32,6 +32,23 @@ object DisjointSetsSpec extends Specification {
       val unioned = ds.union(1, 2)
       unioned.find(1) must be equalTo(unioned.find(2))
     }
+    "calculate new rank for equal rank union" in new data {
+      val res = ds.union(1, 2)
+      val n1 = res.nodes.get(1).get
+      n1.rank must beEqualTo(1)
+      res.nodes.get(2).get.getRepresentativeOfSet must beEqualTo(n1)
+      res.nodes.get(3).get.rank must beEqualTo(0)
+    }
+    "make correct parent for rank1 < rank2" in new data {
+      val res = ds.union(1, 2).union(3, 2)
+      val n3 = res.nodes.get(3).get
+      n3.rank must beEqualTo(0)
+      n3.parent must beEqualTo(res.nodes.get(1))
+    }
+    "make correct parent for rank1 > rank2" in new data {
+      val res = ds.union(1, 2).union(2, 3)
+      res.nodes.get(3).get.parent must be equalTo(res.nodes.get(1))
+    }
     "work for a more complex example" in {
       // Example taken from Cormen, et.al., Introduction to Algorithms (p.500)
       val ds = List( // edges

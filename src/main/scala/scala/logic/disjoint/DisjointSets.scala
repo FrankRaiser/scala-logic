@@ -76,7 +76,6 @@ class DisjointSets[T](val nodes: Map[T, Node[T]] = Map.empty) {
       
       // we are guaranteed to find the two nodes in the map,
       // and the above cases cover all possibilities
-      case _ => throw new MatchError("This should never have happened")
     }
   }
 

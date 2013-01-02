@@ -13,6 +13,8 @@ scalacOptions in ThisBuild ++= Seq(
 
 //testOptions in Test += Tests.Argument("xonly")
 
+seq(ScctPlugin.instrumentSettings : _*)
+
 // specs2 library
 libraryDependencies ++= Seq(
    "org.specs2" %% "specs2" % "1.12.2" % "test" cross CrossVersion.full,
