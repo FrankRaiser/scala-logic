@@ -72,5 +72,11 @@ object TermParserSpec extends Specification {
       "f(3)".asTerm =:= Var("X")
       success
     }
+    "parse variables multiple times" in new store {
+      val fxx = TermParser.parse("f(X, X)").asInstanceOf[Term2[Any, Any, Any]]
+      val x1 = fxx.arg1.asInstanceOf[Var[Any]]
+      val x2 = fxx.arg2.asInstanceOf[Var[Any]]
+      x1.## must beEqualTo(x2.##)
+    }
   }
 }

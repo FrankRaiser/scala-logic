@@ -21,7 +21,7 @@ object UnificationVarSpec extends Specification {
     x =:= y must beUnifiable
   }
   
-  def notBeUnifiable = throwA(new UnificationException("", null, null))
+  def notBeUnifiable = throwA[Exception].like { case ue : UnificationException[_] => 1 === 1 }
   def beUnifiable = throwA[Throwable].not
 
   "A logic variable" should {

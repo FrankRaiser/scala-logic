@@ -5,7 +5,7 @@ import scala.util.parsing.combinator.RegexParsers
 import scala.util.parsing.combinator.JavaTokenParsers
 
 object TermParser extends JavaTokenParsers {
-  def term : Parser[Term[Any]] = (
+  def term(implicit variableStore : VariableStore) : Parser[Term[Any]] = (
       floatingPointNumber ^^ { s => 
         try { new Constant[Any](s.toInt) } catch { case _ => 
           try { new Constant[Any](s.toLong) } catch { case _ => 
@@ -33,14 +33,14 @@ object TermParser extends JavaTokenParsers {
           val arg3 = s._2
         }
       }
-    | """[A-Z]""".r ~ opt(ident) ^^ { s => 
-      new Var[Any]("" + s._1 + s._2.getOrElse(""))
+    | """[A-Z]""".r ~ opt(ident) ^^ { s =>
+      variableStore.provideVar[Any]("" + s._1 + s._2.getOrElse(""))
       }
     | ident ^^ { s => new Constant[Any](s)}
   )
   
-  def parse(s : String) : Term[Any] = {
-    this.parse(term, s).get
+  def parse(s : String)(implicit variableStore : VariableStore) : Term[Any] = {
+    this.parse(term(variableStore), s).get
   }
 }
 

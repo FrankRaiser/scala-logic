@@ -1,6 +1,6 @@
 package scala.logic
 
-class UnificationException[T](reason : String, term1 : Term[T], term2 : Term[T]) extends Exception
+class UnificationException[T](val reason : String, val term1 : Term[T], val term2 : Term[T]) extends Exception(reason)
 
 /**
  * A general n-ary term. Terms that can be evaluated can be constructed by

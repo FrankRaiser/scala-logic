@@ -43,9 +43,11 @@ class DisjointSets[T](val nodes: Map[T, Node[T]] = Map.empty) {
         "Only elements contained in the disjoint-sets can be unioned")
     require(elem1 != elem2, "Only different elements can be unioned")
         
-    // retrieve representative nodes
-    (nodes.get(elem1).map(_.getRepresentativeOfSet), 
-     nodes.get(elem2).map(_.getRepresentativeOfSet)) match {
+    val p = (nodes.get(elem1).map(_.getRepresentativeOfSet), 
+     nodes.get(elem2).map(_.getRepresentativeOfSet))
+    // we are guaranteed to find the two nodes in the map,
+    // and the below cases cover all possibilities
+    (p : @unchecked) match {
       
       // Case #1: both elements already in same set
       case (Some(n1), Some(n2)) if n1 == n2 => 
@@ -73,9 +75,6 @@ class DisjointSets[T](val nodes: Map[T, Node[T]] = Map.empty) {
             updateNodes(nodes, List(
                 (n1 -> newn1),
                 (n2 -> n2.copy(parent = Some(newn1))))))
-      
-      // we are guaranteed to find the two nodes in the map,
-      // and the above cases cover all possibilities
     }
   }
 

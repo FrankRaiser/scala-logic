@@ -12,7 +12,7 @@ object UnificationConstantSpec extends Specification {
     implicit val variableStore = new VariableStore
   }
   
-  def notBeUnifiable = throwA(new UnificationException("", null, null))
+  def notBeUnifiable = throwA[Exception].like { case ue : UnificationException[_] => 1 === 1 }
 
   "A constant" should {
     "be unifiable with itself" in new store {

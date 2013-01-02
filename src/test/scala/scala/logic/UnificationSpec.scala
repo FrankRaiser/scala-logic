@@ -92,7 +92,7 @@ object UnificationSpec extends Specification {
     }
   }
   
-  def notBeUnifiable = throwA(new UnificationException("", null, null))
+  def notBeUnifiable = throwA[Exception].like { case ue : UnificationException[_] => 1 === 1 }
   def beUnifiable = throwA[Throwable].not
 
   "Unification support" should {
