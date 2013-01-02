@@ -13,6 +13,13 @@ object TermParserSpec extends Specification {
   }
   
   "The term parser" should {
+    "fail to parse invalid terms" in new store {
+      TermParser.parse("f(something, )") must throwA[Exception]
+      TermParser.parse("f(something") must throwA[Exception]
+      TermParser.parse("f((1)") must throwA[Exception]
+      TermParser.parse(")1") must throwA[Exception]
+      TermParser.parse("f()") must throwA[Exception]
+    }
     "parse a constant int" in new store {
       //skipped("Implementation not finished yet")
       TermParser.parse("0") must be equalTo(Constant(0))

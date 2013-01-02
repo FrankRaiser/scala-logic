@@ -51,23 +51,25 @@ class Var[T](val name : String)
         val root2 = variableStore.getSetRepresentative(other.asInstanceOf[Var[Any]])
           .getOrElse(throw new RuntimeException("Internal error: variable root missing in variable store"))
         // find representatives of disjoint set
+        val term1 = root1.getTerm
+        val term2 = root2.getTerm
         if (root1 == root2) {
           root1.asInstanceOf[Var[T]] 
         }
-        else if (root1.isBound && root2.isBound) {
-          root1.boundTerm.get =:= root2.boundTerm.get
+        else if (term1.isDefined && term2.isDefined) {
+          term1.get =:= term2.get
           // if we made it to this point, then both bound terms
           // could be successfully unified, so we can unify the
           // variables themselves
           variableStore.union(root1, root2).asInstanceOf[Var[T]]
-        } else if (root1.isBound && !root2.isBound) {
-          if (root1.occurs(root2)) {
+        } else if (term1.isDefined && !term2.isDefined) {
+          if (term1.get.occurs(root2)) {
             throw new UnificationException("Variable must not occur in a term it is unified with", root1, root2)
           }
           root2.boundTerm = root1.boundTerm
           variableStore.union(root1, root2).asInstanceOf[Var[T]]
-        } else if (!root1.isBound && root2.isBound) {
-          if (root2.occurs(root1)) {
+        } else if (!term1.isDefined && term2.isDefined) {
+          if (term2.get.occurs(root1)) {
             throw new UnificationException("Variable must not occur in a term it is unified with", root1, root2)
           }
           root1.boundTerm = root2.boundTerm

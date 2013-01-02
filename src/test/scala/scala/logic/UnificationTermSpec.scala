@@ -117,12 +117,32 @@ object UnificationTermSpec extends Specification {
       "for 2-ary terms with arg1 non-ground" in new terms {
         val x = Var[Any]("X")
         x =:= Constant[Any]("val2")
-        TermParser.parse("f(X, val3)").substituted =:= TermParser.parse("f(val2,val3)")
+        TermParser.parse("f(X, val3)").substituted =:= 
+          TermParser.parse("f(val2,val3)")
       }
       "for 2-ary terms with arg2 non-ground" in new terms {
         val x = Var[Any]("X")
         x =:= Constant[Any]("val3")
-        TermParser.parse("f(val2, X)").substituted =:= TermParser.parse("f(val2, val3)")
+        TermParser.parse("f(val2, X)").substituted =:= 
+          TermParser.parse("f(val2, val3)")
+      }
+      "for 3-ary terms with arg1 non-ground" in new terms {
+        val x = Var[Any]("X")
+        x =:= Constant[Any]("val1")
+        TermParser.parse("f(X, val2, val3)").substituted =:=
+          TermParser.parse("f(val1, val2, val3)")
+      }
+      "for 3-ary terms with arg2 non-ground" in new terms {
+        val x = Var[Any]("X")
+        x =:= Constant[Any]("val2")
+        TermParser.parse("f(val1, X, val3)").substituted =:=
+          TermParser.parse("f(val1, val2, val3)")
+      }
+      "for 3-ary terms with arg3 non-ground" in new terms {
+        val x = Var[Any]("X")
+        x =:= Constant[Any]("val3")
+        TermParser.parse("f(val1, val2, X)").substituted =:=
+          TermParser.parse("f(val1, val2, val3)")
       }
     }
   }

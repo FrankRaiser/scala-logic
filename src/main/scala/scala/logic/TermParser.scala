@@ -3,6 +3,7 @@ package scala.logic
 import scala.util.parsing.combinator.syntactical.StandardTokenParsers
 import scala.util.parsing.combinator.RegexParsers
 import scala.util.parsing.combinator.JavaTokenParsers
+import java.text.ParseException
 
 object TermParser extends JavaTokenParsers {
   def term(implicit variableStore : VariableStore) : Parser[Term[Any]] = (
@@ -36,11 +37,11 @@ object TermParser extends JavaTokenParsers {
     | """[A-Z]""".r ~ opt(ident) ^^ { s =>
       variableStore.provideVar[Any]("" + s._1 + s._2.getOrElse(""))
       }
-    | ident ^^ { s => new Constant[Any](s)}
+    | ident ^^ { s => new Constant[Any](s)} 
   )
   
   def parse(s : String)(implicit variableStore : VariableStore) : Term[Any] = {
-    this.parse(term(variableStore), s).get
+    this.parseAll(term(variableStore), s).get
   }
 }
 

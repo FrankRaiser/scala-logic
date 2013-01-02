@@ -91,5 +91,47 @@ object UnificationVarSpec extends Specification {
       }
       x.isGround must beTrue
     }
+    "not unify for y = f(x) and x = y" in new sampleData {
+      val y = Var[Int]("Y")
+      y =:= new Term1[Int, Int] {
+        val symbol = "f"
+        val arg1 = x
+      }
+      x =:= y must notBeUnifiable
+    }
+    "not unify for y = f(x) and y = x" in new sampleData {
+      val y = Var[Int]("Y")
+      y =:= new Term1[Int, Int] {
+        val symbol = "f"
+        val arg1 = x
+      }
+      y =:= x must notBeUnifiable
+    }
+    "unify with a variable bound to same term" in new store {
+      val x = Var[Any]("X")
+      val y = Var[Any]("Y")
+      x =:= TermParser.parse("f(val1, val2)")
+      y =:= TermParser.parse("f(val1, val2)")
+      x =:= y
+    }
+    "unify with a variable bound to a term" in new store {
+      val x = Var[Any]("X")
+      val y = Var[Any]("Y")
+      y =:= TermParser.parse("f(val1, val2)")
+      x =:= y
+    }
+    "be unifiable with a variable bound to a term" in new store {
+      val x = Var[Any]("X")
+      val y = Var[Any]("Y")
+      y =:= TermParser.parse("f(val1, val2)")
+      y =:= x
+    }
+    "unify with a unified unbound variable" in new store {
+      val x = Var[Any]("X")
+      val y = Var[Any]("Y")
+      val z = Var[Any]("Z")
+      y =:= z
+      x =:= y
+    }
   }
 }
