@@ -19,29 +19,29 @@ import scala.annotation.tailrec
  */
 class DisjointSets[T](val nodes: Map[T, Node[T]] = Map.empty) {
   
-  private var compressedPaths : scala.collection.mutable.Map[T, Node[T]] = 
+  private var compressedPaths : scala.collection.mutable.Map[T, T] = 
     scala.collection.mutable.Map.empty
   
   def add(element : T) : DisjointSets[T] =
     new DisjointSets(nodes + (element -> Node(element, 0, None)) )
 
-  @tailrec
-  private def updateNodes(nodes : Map[T, Node[T]], updates: List[(Node[T], Node[T])]) : Map[T, Node[T]] =
-    updates match {
-    case (nodeOld, nodeNew) :: xs =>
-      updateNodes( nodes.map(p =>
-        if (p._2.parent == Some(nodeOld)) 
-          (p._1 -> p._2.copy(parent = Some(nodeNew)))
-        else 
-          p) 
-        + (nodeNew.elem -> nodeNew), xs)
-    case _ => nodes
-  }
-  
-  private def createDisjointSetsWithCurrentCompressedPaths(nodes : Map[T, Node[T]]) = {
-    val ds = new DisjointSets(nodes)
+  private def createDisjointSetsWithUpdatedNodesAndCompressedPaths(
+      updates : List[(Node[T], Node[T])]) : DisjointSets[T] = {
+    val updatedNodes = nodes ++ (updates.map(p => p._2.elem -> p._2))
+    val ds = new DisjointSets(updatedNodes)
     ds.compressedPaths ++= this.compressedPaths
     ds
+  }
+  
+  @tailrec
+  final def getRepresentativeOfSet(elem : T): Node[T] = {
+    val node = nodes.get(elem)
+    require(node.isDefined, "element must be in disjoint sets")
+    node.get.parent match {
+      case None => node.get
+      case Some(parentElem) =>
+        getRepresentativeOfSet(parentElem)
+    }
   }
   
   def union(elem1 : T, elem2 : T) : DisjointSets[T] = synchronized {
@@ -49,51 +49,47 @@ class DisjointSets[T](val nodes: Map[T, Node[T]] = Map.empty) {
         "Only elements contained in the disjoint-sets can be unioned")
     require(elem1 != elem2, "Only different elements can be unioned")
         
-    val p = (nodes.get(elem1).map(_.getRepresentativeOfSet), 
-     nodes.get(elem2).map(_.getRepresentativeOfSet))
+    val p = (getRepresentativeOfSet(elem1), getRepresentativeOfSet(elem2))
     // we are guaranteed to find the two nodes in the map,
     // and the below cases cover all possibilities
     (p : @unchecked) match {
       
       // Case #1: both elements already in same set
-      case (Some(n1), Some(n2)) if n1 == n2 => 
-        createDisjointSetsWithCurrentCompressedPaths(nodes)
+      case (n1, n2) if n1 == n2 => 
+        createDisjointSetsWithUpdatedNodesAndCompressedPaths(List())
 
       // Case #2: rank1 > rank2 -> make n1 parent of n2
-      case (Some(n1 @ Node(_, rank1, _)), 
-            Some(n2 @ Node(_, rank2, _))) if rank1 > rank2 =>
-        createDisjointSetsWithCurrentCompressedPaths(
-            updateNodes(nodes, List(
-                (n2 -> n2.copy(parent = Some(n1))))))
+      case (n1 @ Node(_, rank1, _), 
+            n2 @ Node(_, rank2, _)) if rank1 > rank2 =>
+        createDisjointSetsWithUpdatedNodesAndCompressedPaths(List(
+            (n2 -> n2.copy(parent = Some(n1.elem)))))
         
       // Case #3: rank1 < rank2 -> make n2 parent of n1
-      case (Some(n1 @ Node(_, rank1, _)), 
-            Some(n2 @ Node(_, rank2, _))) if rank1 < rank2 =>
-        createDisjointSetsWithCurrentCompressedPaths(
-            updateNodes(nodes, List(
-                (n1 -> n1.copy(parent = Some(n2))))))
+      case (n1 @ Node(_, rank1, _), 
+            n2 @ Node(_, rank2, _)) if rank1 < rank2 =>
+        createDisjointSetsWithUpdatedNodesAndCompressedPaths(List(
+            (n1 -> n1.copy(parent = Some(n2.elem)))))
         
       // Case #4: rank1 == rank2 -> keep n1 as representative and increment rank
-      case (Some(n1 @ Node(_, rank1, _)), 
-            Some(n2 @ Node(_, rank2, _))) /*if rank1 == rank2*/ =>
+      case (n1 @ Node(_, rank1, _), 
+            n2 @ Node(_, rank2, _)) /*if rank1 == rank2*/ =>
         val newn1 = n1.copy(rank = rank1 + 1)
-        createDisjointSetsWithCurrentCompressedPaths(
-            updateNodes(nodes, List(
-                (n1 -> newn1),
-                (n2 -> n2.copy(parent = Some(newn1))))))
+        createDisjointSetsWithUpdatedNodesAndCompressedPaths(List(
+            (n1 -> newn1),
+            (n2 -> n2.copy(parent = Some(newn1.elem)))))
     }
   }
 
   def find(elem : T) : Option[T] = synchronized {
-    val startNode = compressedPaths.get(elem) match {
-      case Some(node) => Some(node)
+    val startNode = compressedPaths.get(elem).map(nodes.get(_)) match {
+      case Some(node) => node
       case _ => nodes.get(elem)
     }
     
     startNode match {
       case Some(node) =>
-        val rootNode = node.getRepresentativeOfSet
-        compressedPaths += (elem -> rootNode)
+        val rootNode = getRepresentativeOfSet(node.elem)
+        compressedPaths += (elem -> rootNode.elem)
         Some(rootNode.elem)
       case None => None
     } 

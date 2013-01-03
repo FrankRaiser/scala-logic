@@ -4,6 +4,7 @@ import org.specs2.mutable.Specification
 import org.junit.runner.RunWith
 import org.specs2.runner.JUnitRunner
 import org.specs2.specification.Scope
+import scala.logic.exception.UnificationException
 
 @RunWith(classOf[JUnitRunner])
 object UnificationConstantSpec extends Specification {

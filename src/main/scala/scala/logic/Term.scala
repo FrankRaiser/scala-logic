@@ -1,6 +1,7 @@
 package scala.logic
 
-class UnificationException[T](val reason : String, val term1 : Term[T], val term2 : Term[T]) extends Exception(reason)
+import scala.logic.exception.UnificationException
+import scala.logic.exception.MatchingException
 
 /**
  * A general n-ary term. Terms that can be evaluated can be constructed by
@@ -28,6 +29,11 @@ trait Term[T] { self =>
   
   /** unification with other term */
   def =:= (other : Term[T]) : Term[T]
+  
+  /** matching of this term to another term. Variables in passed term
+   * will not be bound.
+   */
+  def := (other : Term[T]) : Term[T]
   
   /** returns the current term, after all variable substitutions
    * have been applied to it.
@@ -71,6 +77,17 @@ trait Term1[T, T1] extends Term[T] { self =>
       this
   }
   
+  def := (other : Term[T]) : Term[T] = other match {
+    case v : Var[_] if !v.isBound =>
+      throw new MatchingException("Cannot match term with unbound variable", this, other)
+    case v : Var[_] => 
+      this := v.getTerm.get
+    case _ =>
+      _testArityAndSymbol(other)
+      arg1 := other.asInstanceOf[Term1[_,_]].arg1.asInstanceOf[Term[T1]]
+      this
+  }
+  
   override def occurs[VT](variable : Var[VT]) = arg1 occurs variable
   
   def substituted : Term[T] = new Term1[T, T1]() {
@@ -103,7 +120,19 @@ trait Term2[T, T1, T2] extends Term[T] { self =>
       arg1 =:= other.asInstanceOf[Term2[_,_,_]].arg1.asInstanceOf[Term[T1]]
       arg2 =:= other.asInstanceOf[Term2[_,_,_]].arg2.asInstanceOf[Term[T2]]
       this
-  } 
+  }
+  
+  def := (other : Term[T]) : Term[T] = other match {
+    case v : Var[_] if !v.isBound =>
+      throw new MatchingException("Cannot match term with unbound variable", this, other)
+    case v : Var[_] => 
+      this := v.getTerm.get
+    case _ =>
+      _testArityAndSymbol(other)
+      arg1 := other.asInstanceOf[Term2[_,_,_]].arg1.asInstanceOf[Term[T1]]
+      arg2 := other.asInstanceOf[Term2[_,_,_]].arg2.asInstanceOf[Term[T2]]
+      this
+  }
   
   override def occurs[VT](variable : Var[VT]) = 
     (arg1 occurs variable) || (arg2 occurs variable)
@@ -141,6 +170,19 @@ trait Term3[T, T1, T2, T3] extends Term[T] { self =>
       arg1 =:= other.asInstanceOf[Term3[_,_,_,_]].arg1.asInstanceOf[Term[T1]]
       arg2 =:= other.asInstanceOf[Term3[_,_,_,_]].arg2.asInstanceOf[Term[T2]]
       arg3 =:= other.asInstanceOf[Term3[_,_,_,_]].arg3.asInstanceOf[Term[T3]]
+      this
+  }
+  
+  def := (other : Term[T]) : Term[T] = other match {
+    case v : Var[_] if !v.isBound =>
+      throw new MatchingException("Cannot match term with unbound variable", this, other)
+    case v : Var[_] => 
+      this := v.getTerm.get
+    case _ =>
+      _testArityAndSymbol(other)
+      arg1 := other.asInstanceOf[Term3[_,_,_,_]].arg1.asInstanceOf[Term[T1]]
+      arg2 := other.asInstanceOf[Term3[_,_,_,_]].arg2.asInstanceOf[Term[T2]]
+      arg3 := other.asInstanceOf[Term3[_,_,_,_]].arg3.asInstanceOf[Term[T3]]
       this
   }
   

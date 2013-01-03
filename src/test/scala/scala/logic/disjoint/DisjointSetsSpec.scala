@@ -36,18 +36,18 @@ object DisjointSetsSpec extends Specification {
       val res = ds.union(1, 2)
       val n1 = res.nodes.get(1).get
       n1.rank must beEqualTo(1)
-      res.nodes.get(2).get.getRepresentativeOfSet must beEqualTo(n1)
+      res.getRepresentativeOfSet(2) must beEqualTo(n1)
       res.nodes.get(3).get.rank must beEqualTo(0)
     }
     "make correct parent for rank1 < rank2" in new data {
       val res = ds.union(1, 2).union(3, 2)
       val n3 = res.nodes.get(3).get
       n3.rank must beEqualTo(0)
-      n3.parent must beEqualTo(res.nodes.get(1))
+      n3.parent must beEqualTo(Some(1))
     }
     "make correct parent for rank1 > rank2" in new data {
       val res = ds.union(1, 2).union(2, 3)
-      res.nodes.get(3).get.parent must be equalTo(res.nodes.get(1))
+      res.nodes.get(3).get.parent must be equalTo(Some(1))
     }
     "work for a more complex example" in {
       // Example taken from Cormen, et.al., Introduction to Algorithms (p.500)
@@ -62,6 +62,9 @@ object DisjointSetsSpec extends Specification {
               (dset, p) => dset.union(p._1, p._2))
       // check result
       val r1 = ds.find('a')
+      println("####")
+      ds.find('d')
+      println("$$$$")
       for (c <- List('a', 'b', 'c', 'd')) ds.find(c) must be equalTo(r1)
       ds.size must be equalTo(4)
     }

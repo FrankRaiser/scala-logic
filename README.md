@@ -37,6 +37,28 @@ A logic variable can be bound to a term as follows:
     Var("Y").value == Some(3) // true
     Var[Int]("X") =:= Var[String]("Y") // compile error
    
+### Matching ###
+
+Matching performs like a one-sided unification as follows:
+
+    Var("X") := 3 // binds X to 3
+    3 := 3 // Matches (and returns the Constant(3) )
+    3 := 4 // throws a MatchException
+    val x = Var[Int]("X") ; x =:= 3 ; 2 := x // throws a MatchException
+    
+Note that whenever a variable on the left-side of := is matched, it is actually
+unified with the corresponding term on the right-side. Hence, in the following example
+both variables will be bound to the constant 2:
+
+    val x = Var[Int]("X")
+    val y = Var[Int]("Y")
+    x := y  // Match
+    y =:= 2 // Unification
+    x.getTerm == Some(Constant[Int](2)) 
+
+Hence also the requirement to use fresh variables for the left side of the matching
+performed by rule systems like Prolog or Datalog.
+
 Terms
 ----
 

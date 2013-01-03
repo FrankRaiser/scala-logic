@@ -1,5 +1,8 @@
 package scala.logic
 
+import scala.logic.exception.UnificationException
+import scala.logic.exception.MatchingException
+
 /**
  * A typed logic variable, which registers itself with the provided store.
  * @author Frank Raiser
@@ -47,10 +50,9 @@ class Var[T](val name : String)
           .getOrElse(throw new RuntimeException("Internal error: variable root missing in variable store"))
     val root1T = root1.asInstanceOf[Var[T]]
     other match {
-      case v if v.isInstanceOf[Var[_]] =>
+      case v : Var[_] =>
         val root2 = variableStore.getSetRepresentative(other.asInstanceOf[Var[Any]])
           .getOrElse(throw new RuntimeException("Internal error: variable root missing in variable store"))
-        // find representatives of disjoint set
         val term1 = root1.getTerm
         val term2 = root2.getTerm
         if (root1 == root2) {
@@ -78,7 +80,7 @@ class Var[T](val name : String)
           val res = variableStore.union(root1, root2).asInstanceOf[Var[T]]
           if (res == root1) {
             root2.boundTerm = Some(root1)
-          } else {
+          } else { 
             root1.boundTerm = Some(root2)
           }
           res
@@ -93,6 +95,32 @@ class Var[T](val name : String)
         // recursively unify the terms
         root1T.boundTerm.get =:= t
         root1T
+    }
+  }
+  
+  def := (other : Term[T]) : Term[T] = {
+    val root1 = variableStore.getSetRepresentative(this.asInstanceOf[Var[Any]])
+          .getOrElse(throw new RuntimeException("Internal error: variable root missing in variable store"))
+    val term1 = root1.getTerm
+    if (term1.isDefined) {
+      // Match to the actual term instead
+      term1.get.asInstanceOf[Term[T]] := other
+    } else other match {
+      case v : Var[_] =>
+        val root2 = variableStore.getSetRepresentative(other.asInstanceOf[Var[Any]])
+          .getOrElse(throw new RuntimeException("Internal error: variable root missing in variable store"))
+        val term2 = root2.getTerm
+        if (term2.isDefined) {
+          // Match to actual term instead
+          this := term2.get.asInstanceOf[Term[T]]
+        } else if (root1 == root2) {
+          throw new MatchingException("Cannot match a variable to itself", this, other)
+        } else {
+          // unify the variables
+          this =:= v
+        }
+      case t : Term[_] =>
+        this =:= t
     }
   }
   
