@@ -38,6 +38,12 @@ class DisjointSets[T](val nodes: Map[T, Node[T]] = Map.empty) {
     case _ => nodes
   }
   
+  private def createDisjointSetsWithCurrentCompressedPaths(nodes : Map[T, Node[T]]) = {
+    val ds = new DisjointSets(nodes)
+    ds.compressedPaths ++= this.compressedPaths
+    ds
+  }
+  
   def union(elem1 : T, elem2 : T) : DisjointSets[T] = synchronized {
     require(nodes.contains(elem1) && nodes.contains(elem2), 
         "Only elements contained in the disjoint-sets can be unioned")
@@ -51,19 +57,19 @@ class DisjointSets[T](val nodes: Map[T, Node[T]] = Map.empty) {
       
       // Case #1: both elements already in same set
       case (Some(n1), Some(n2)) if n1 == n2 => 
-        new DisjointSets(nodes) // new copy due to mutable path compression
+        createDisjointSetsWithCurrentCompressedPaths(nodes)
 
       // Case #2: rank1 > rank2 -> make n1 parent of n2
       case (Some(n1 @ Node(_, rank1, _)), 
             Some(n2 @ Node(_, rank2, _))) if rank1 > rank2 =>
-        new DisjointSets(
+        createDisjointSetsWithCurrentCompressedPaths(
             updateNodes(nodes, List(
                 (n2 -> n2.copy(parent = Some(n1))))))
         
       // Case #3: rank1 < rank2 -> make n2 parent of n1
       case (Some(n1 @ Node(_, rank1, _)), 
             Some(n2 @ Node(_, rank2, _))) if rank1 < rank2 =>
-        new DisjointSets(
+        createDisjointSetsWithCurrentCompressedPaths(
             updateNodes(nodes, List(
                 (n1 -> n1.copy(parent = Some(n2))))))
         
@@ -71,7 +77,7 @@ class DisjointSets[T](val nodes: Map[T, Node[T]] = Map.empty) {
       case (Some(n1 @ Node(_, rank1, _)), 
             Some(n2 @ Node(_, rank2, _))) /*if rank1 == rank2*/ =>
         val newn1 = n1.copy(rank = rank1 + 1)
-        new DisjointSets(
+        createDisjointSetsWithCurrentCompressedPaths(
             updateNodes(nodes, List(
                 (n1 -> newn1),
                 (n2 -> n2.copy(parent = Some(newn1))))))
