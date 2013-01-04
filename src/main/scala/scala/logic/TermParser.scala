@@ -40,9 +40,13 @@ object TermParser extends JavaTokenParsers {
     | ident ^^ { s => new Constant[Any](s)} 
   )
   
-  def parse(s : String)(implicit variableStore : VariableStore) : Term[Any] = {
-    this.parseAll(term(variableStore), s).get
-  }
+  def parse(s : String)(implicit variableStore : VariableStore) : Term[Any] =
+    /* Parsing is synchronized due to a bug in the Scala parser combinators
+     * making them non-thread-safe, which would lead to occasional NPEs otherwise
+     */
+    synchronized {
+      this.parseAll(term(variableStore), s).get
+    }
 }
 
 class TermBuilder(s : String) {
