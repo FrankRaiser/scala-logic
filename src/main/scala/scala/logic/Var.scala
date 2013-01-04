@@ -11,6 +11,7 @@ class Var[T](val name : String)
     (implicit variableStore : VariableStore, mf : scala.reflect.Manifest[T]) 
     extends Term0[T] { 
   
+  require(!name.isEmpty, "Variables must have a name")
   val symbol = name
   
   /** local term bound to this variable */
@@ -122,6 +123,27 @@ class Var[T](val name : String)
       case t : Term[_] =>
         this =:= t
     }
+  }
+  
+  def makeFreshTermWithVariables(
+      freshVars : VariableSubstitution = Map.empty) : (Term[T], VariableSubstitution) = {
+    if (freshVars.contains(this.asInstanceOf[Var[Any]])) {
+      (freshVars.get(this.asInstanceOf[Var[Any]]).get.asInstanceOf[Term[T]], freshVars)
+    } else {
+      val newThis = new Var[T](variableStore.getFreshNameWithPrefix(getNamePrefix))(variableStore, mf)
+      (newThis, freshVars + (this.asInstanceOf[Var[Any]] -> newThis.asInstanceOf[Var[Any]]))
+    }
+  }
+    
+  private def getNamePrefix = {
+    if (name.size < variableStore.RANDOM_SUFFIX_LENGTH+1) name
+    else try {
+	  name.substring(name.size-variableStore.RANDOM_SUFFIX_LENGTH).toInt
+	  name.substring(0, name.size-variableStore.RANDOM_SUFFIX_LENGTH)
+	} catch {
+	  case ex: NumberFormatException =>
+	    name
+	}
   }
   
   override def occurs[VT](variable : Var[VT]) = this == variable

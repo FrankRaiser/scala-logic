@@ -33,5 +33,12 @@ object VariableStoreSpec extends Specification {
       variableStore.provideVar[String]("X") must throwA[Throwable]
       Var[String]("X") must throwA[Throwable]
     }
+    "create fresh variable names by finding a random empty space" in {
+      implicit val vs = new VariableStore {
+        override val RANDOM_SUFFIX_LENGTH = 1
+      }
+      for (i <- 0 to 9 if i != 4) Var[Any]("X" + i)
+      vs.getFreshNameWithPrefix("X") must be equalTo("X4")
+    }
   }
 }

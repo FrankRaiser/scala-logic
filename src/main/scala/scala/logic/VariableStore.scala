@@ -1,6 +1,7 @@
 package scala.logic
 
 import scala.logic.disjoint.DisjointSets
+import scala.util.Random
 
 /**
  * A variable store keeps track of a set of variables and its unifications.
@@ -12,6 +13,8 @@ class VariableStore {
   
   private var disjointSets = new DisjointSets[Var[Any]](Map.empty)
   
+  val RANDOM_SUFFIX_LENGTH = 4
+  
   def getSetRepresentative(v : Var[Any]) : Option[Var[Any]] = disjointSets.find(v)
   
   def union(var1 : Var[Any], var2 : Var[Any]) : Var[Any] = synchronized {
@@ -22,7 +25,19 @@ class VariableStore {
   
   def allVariables = variables.values
   
+  private def getRandomSuffix = ("%0" + RANDOM_SUFFIX_LENGTH + "d").format(
+      (math.abs(Random.nextInt) % math.pow(10, RANDOM_SUFFIX_LENGTH).toInt))
+  
+  def getFreshNameWithPrefix(prefix : String) = {
+    var name : String = prefix + getRandomSuffix
+    while (variables.contains(name))
+      name = prefix + getRandomSuffix
+    name
+  }
+  
   def register[T](regVar : Var[T])(implicit mf : scala.reflect.Manifest[T]) = {
+    require(disjointSets.find(regVar.asInstanceOf[Var[Any]]) == None, 
+        "Variable already registered in variable store.")
     disjointSets = disjointSets add regVar.asInstanceOf[Var[Any]]
     variables += (regVar.name -> (regVar.asInstanceOf[Var[Any]], mf.toString) )
   }

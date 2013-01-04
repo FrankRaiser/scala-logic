@@ -48,4 +48,8 @@ case class Constant[T](val value : T) extends Term0[T] with Function0[T] {
     case _ =>
       throw new MatchingException("Differing terms", this, other)
   }
+  
+  def makeFreshTermWithVariables(
+      freshVars : VariableSubstitution = Map.empty) : (Term[T], VariableSubstitution) =
+        (this, freshVars)
 }

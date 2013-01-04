@@ -46,5 +46,6 @@ object TermParser extends JavaTokenParsers {
 }
 
 class TermBuilder(s : String) {
-  def asTerm : Term[Any] = TermParser.parse(s)
+  def asTerm(implicit variableStore : VariableStore) : Term[Any] = 
+    TermParser.parse(s)(variableStore)
 }

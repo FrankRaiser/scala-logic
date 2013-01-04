@@ -14,6 +14,8 @@ trait Term[T] { self =>
   
   def isGround : Boolean
   
+  type VariableSubstitution = Map[Var[Any], Var[Any]]
+  
   protected def _testArityAndSymbol(other : Term[T]) : self.type = 
     if (arity != other.arity) 
       throw new UnificationException("Different arities", this, other)
@@ -34,6 +36,14 @@ trait Term[T] { self =>
    * will not be bound.
    */
   def := (other : Term[T]) : Term[T]
+  
+  /** Create a fresh copy of this term, i.e. a copy in which all
+   * variables are replaced by new unused variables.
+   */
+  def fresh : Term[T] = makeFreshTermWithVariables(Map.empty)._1
+  
+  def makeFreshTermWithVariables(
+      freshVars : VariableSubstitution = Map.empty) : (Term[T], VariableSubstitution) 
   
   /** returns the current term, after all variable substitutions
    * have been applied to it.
@@ -88,6 +98,15 @@ trait Term1[T, T1] extends Term[T] { self =>
       this
   }
   
+  def makeFreshTermWithVariables(
+      freshVars : VariableSubstitution = Map.empty) : (Term[T], VariableSubstitution) = {
+    val (freshArg1, sub1) = arg1.makeFreshTermWithVariables(freshVars)
+    (new Term1[T, T1]() {
+      val symbol = self.symbol
+      val arg1 = freshArg1
+    }, sub1)
+  }
+  
   override def occurs[VT](variable : Var[VT]) = arg1 occurs variable
   
   def substituted : Term[T] = new Term1[T, T1]() {
@@ -132,6 +151,17 @@ trait Term2[T, T1, T2] extends Term[T] { self =>
       arg1 := other.asInstanceOf[Term2[_,_,_]].arg1.asInstanceOf[Term[T1]]
       arg2 := other.asInstanceOf[Term2[_,_,_]].arg2.asInstanceOf[Term[T2]]
       this
+  }
+  
+  def makeFreshTermWithVariables(
+      freshVars : VariableSubstitution = Map.empty) : (Term[T], VariableSubstitution) = {
+    val (freshArg1, sub1) = arg1.makeFreshTermWithVariables(freshVars)
+    val (freshArg2, sub2) = arg2.makeFreshTermWithVariables(sub1)
+    (new Term2[T, T1, T2]() {
+      val symbol = self.symbol
+      val arg1 = freshArg1
+      val arg2 = freshArg2
+    }, sub2)
   }
   
   override def occurs[VT](variable : Var[VT]) = 
@@ -184,6 +214,19 @@ trait Term3[T, T1, T2, T3] extends Term[T] { self =>
       arg2 := other.asInstanceOf[Term3[_,_,_,_]].arg2.asInstanceOf[Term[T2]]
       arg3 := other.asInstanceOf[Term3[_,_,_,_]].arg3.asInstanceOf[Term[T3]]
       this
+  }
+  
+  def makeFreshTermWithVariables(
+      freshVars : VariableSubstitution = Map.empty) : (Term[T], VariableSubstitution) = {
+    val (freshArg1, sub1) = arg1.makeFreshTermWithVariables(freshVars)
+    val (freshArg2, sub2) = arg2.makeFreshTermWithVariables(sub1)
+    val (freshArg3, sub3) = arg3.makeFreshTermWithVariables(sub2)
+    (new Term3[T, T1, T2, T3]() {
+      val symbol = self.symbol
+      val arg1 = freshArg1
+      val arg2 = freshArg2
+      val arg3 = freshArg3
+    }, sub3)
   }
   
   override def occurs[VT](variable : Var[VT]) = 
