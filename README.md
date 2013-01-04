@@ -91,8 +91,12 @@ Variables and constants are also Term0 instances.
 Variable store
 ----
 
-All variables are assigned to an implicit variable store at their creation. This store keeps track
-of the unifications and provides faster lookup of values, as explained by the following example:
+All variables are assigned to an implicit variable store at their creation. Hence, you need to provide
+this store somewhere in your program as follows:
+
+    implicit val variableStore = new scala.logic.VariableStore 
+
+This store keeps track of the unifications and provides faster lookup of values, as explained by the following example:
 
     Var("X") =:= Var("Y") =:= Var("Z")
     Var("Z") =:= 1

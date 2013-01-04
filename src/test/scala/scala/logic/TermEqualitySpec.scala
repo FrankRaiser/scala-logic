@@ -20,7 +20,7 @@ object TermEqualitySpec extends Specification {
     "be false for different constants" in {
       Constant[Int](3) should not be equalTo(Constant[Int](4))
     }
-    "be false for constant and other term" in {
+    "be false for constant and other term" in new scope {
       Constant[Int](3) should not be equalTo(
           TermParser.parse("f(3)"))
       Constant[Int](3) should not be equalTo(
