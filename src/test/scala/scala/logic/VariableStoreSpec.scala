@@ -37,7 +37,8 @@ object VariableStoreSpec extends Specification {
       implicit val vs = new VariableStore {
         override val RANDOM_SUFFIX_LENGTH = 1
       }
-      for (i <- 0 to 9 if i != 4) Var[Any]("X" + i)
+      for (i <- 0 to 9 if i != 4) Var("X" + i)
+      vs.allVariables.map(_._1.name) must containAllOf(List("X0", "X1", "X9"))
       vs.getFreshNameWithPrefix("X") must be equalTo("X4")
     }
   }

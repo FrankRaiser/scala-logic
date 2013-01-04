@@ -62,9 +62,7 @@ object DisjointSetsSpec extends Specification {
               (dset, p) => dset.union(p._1, p._2))
       // check result
       val r1 = ds.find('a')
-      println("####")
       ds.find('d')
-      println("$$$$")
       for (c <- List('a', 'b', 'c', 'd')) ds.find(c) must be equalTo(r1)
       ds.size must be equalTo(4)
     }
