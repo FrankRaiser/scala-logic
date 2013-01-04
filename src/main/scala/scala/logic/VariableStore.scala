@@ -13,7 +13,7 @@ class VariableStore {
   
   private var disjointSets = new DisjointSets[Var[Any]](Map.empty)
   
-  val RANDOM_SUFFIX_LENGTH = 4
+  val RANDOM_SUFFIX_LENGTH = 7
   
   def getSetRepresentative(v : Var[Any]) : Option[Var[Any]] = disjointSets.find(v)
   

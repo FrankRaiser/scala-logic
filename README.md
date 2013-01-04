@@ -1,13 +1,20 @@
-scala-logic [![Build Status](https://travis-ci.org/FrankRaiser/scala-logic.png)](https://travis-ci.org/FrankRaiser/scala-logic)
+scala-logic
 ===========
 
 scala-logic is a library for logic variables and quantifier-free formulae support in Scala. 
 
-The library supports typed logic variables, general terms, and unification. It does not
+The library supports typed logic variables, general terms, matching, and unification. It does not
 add a full-fledged Prolog-like search engine or constraint solving engine, but rather acts
-as a core library if one wanted to implement these.
+as a core library if one wanted to implement these. (But part of this may be added in the future.)
 
-It further provides a simple constraint-like support for standard operators.
+Tests and Coverage [![Build Status](https://travis-ci.org/FrankRaiser/scala-logic.png)](https://travis-ci.org/FrankRaiser/scala-logic)
+----
+
+The library is fully tested via [specs2](http://etorreborre.github.com/specs2/) unit tests, which are 
+automatically checked on different Scala and JDK versions on [Travis](http://travis-ci.org).
+
+Test coverage is computed with the [Scala Code Coverage Tool](http://mtkopone.github.com/scct/) and
+is kept at 100%. 
 
 Usage
 =====
@@ -30,7 +37,7 @@ only be one variable `X` in a store.
 A logic variable can be bound to a term as follows:   
 
     Var("X") =:= 3 // bind the previously created variable to the term 3
-    Var("X") =:= 4 // throws a UnificationError because X was bound to 3 earlier
+    Var("X") =:= 4 // throws a UnificationException because X was bound to 3 earlier
     3 =:= Var("X") // equivalent to above, except now X is already bound to 3, so nothing is done
    
     Var("X") =:= Var("Y") // unifies the two variables
@@ -138,6 +145,14 @@ this effectively eliminates static type-checking on these terms.
     "f(3)".asTerm =:= Var[Int]("X") // compile error
     "f(3)".asTerm =:= Var[Any]("X") // compiles, but X is effectively untyped
     "f(3)".asTerm =:= Var("X") // same as Var[Any]    
+
+### Creating fresh terms ###
+
+In most logic systems there is a need to create a fresh copy of terms, i.e. a copy
+that uses new variables. In scala-logic all terms provide a fresh() method for this:
+
+    scala> "f(X, g(Y, 3))".asTerm.fresh
+    res0: scala.logic.Term[Any] = f(X3703095,g(Y4176104,3))
 
 License
 =======
