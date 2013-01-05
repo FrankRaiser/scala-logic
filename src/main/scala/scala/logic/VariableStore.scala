@@ -2,6 +2,7 @@ package scala.logic
 
 import scala.logic.disjoint.DisjointSets
 import scala.util.Random
+import scala.reflect.runtime.universe._
 
 /**
  * A variable store keeps track of a set of variables and its unifications.
@@ -35,20 +36,20 @@ class VariableStore {
     name
   }
   
-  def register[T](regVar : Var[T])(implicit mf : scala.reflect.Manifest[T]) = {
+  def register[T : TypeTag](regVar : Var[T]) = {
     require(disjointSets.find(regVar.asInstanceOf[Var[Any]]) == None, 
         "Variable already registered in variable store.")
     disjointSets = disjointSets add regVar.asInstanceOf[Var[Any]]
-    variables += (regVar.name -> (regVar.asInstanceOf[Var[Any]], mf.toString) )
+    variables += (regVar.name -> (regVar.asInstanceOf[Var[Any]], typeOf[T].toString) )
   }
   
-  def provideVar[T](name : String)(implicit mf : scala.reflect.Manifest[T]) : Var[T] = 
+  def provideVar[T : TypeTag](name : String) : Var[T] = 
     variables.get(name) match {
       case Some((v, t)) =>
-        if (t.equals(mf.toString)) v.asInstanceOf[Var[T]]
+        if (t.equals(typeOf[T].toString)) v.asInstanceOf[Var[T]]
         else throw new RuntimeException("Type Error: variable " + name +
             " was registered as " + t +
-            " and retrieved as " + mf.toString)
-      case _ => new Var[T](name)(this, mf) // variable registers itself with us
+            " and retrieved as " + typeOf[T].toString)
+      case _ => new Var[T](name, this) // variable registers itself with us
     }
 }

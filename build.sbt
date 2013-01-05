@@ -5,10 +5,11 @@ version := "0.1-SNAPSHOT"
 
 organization := "scala-logic"
 
-scalaVersion := "2.9.2"
+scalaVersion := "2.10.0"
 
 scalacOptions in ThisBuild ++= Seq(
   "-unchecked",
+  "-feature",
   "-deprecation") 
 
 //testOptions in Test += Tests.Argument("xonly")
@@ -17,7 +18,8 @@ seq(ScctPlugin.instrumentSettings : _*)
 
 // specs2 library
 libraryDependencies ++= Seq(
-   "org.specs2" %% "specs2" % "1.12.2" % "test" cross CrossVersion.full,
+   "org.specs2" %% "specs2" % "1.13" % "test",
+   "org.scala-lang" % "scala-reflect" % "2.10.0",  
    "junit" % "junit" % "4.7"
  )
 

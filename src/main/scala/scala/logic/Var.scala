@@ -2,13 +2,13 @@ package scala.logic
 
 import scala.logic.exception.UnificationException
 import scala.logic.exception.MatchingException
+import scala.reflect.runtime.universe._
 
 /**
  * A typed logic variable, which registers itself with the provided store.
  * @author Frank Raiser
  */
-class Var[T](val name : String)
-    (implicit variableStore : VariableStore, mf : scala.reflect.Manifest[T]) 
+class Var[T : TypeTag](val name : String, val variableStore : VariableStore) 
     extends Term0[T] { 
   
   require(!name.isEmpty, "Variables must have a name")
@@ -130,7 +130,7 @@ class Var[T](val name : String)
     if (freshVars.contains(this.asInstanceOf[Var[Any]])) {
       (freshVars.get(this.asInstanceOf[Var[Any]]).get.asInstanceOf[Term[T]], freshVars)
     } else {
-      val newThis = new Var[T](variableStore.getFreshNameWithPrefix(getNamePrefix))(variableStore, mf)
+      val newThis = new Var[T](variableStore.getFreshNameWithPrefix(getNamePrefix), variableStore)
       (newThis, freshVars + (this.asInstanceOf[Var[Any]] -> newThis.asInstanceOf[Var[Any]]))
     }
   }
@@ -150,10 +150,10 @@ class Var[T](val name : String)
   
   override def substituted : Term[T] = getTerm.getOrElse(this)
   
-  variableStore.register(this)(mf)
+  variableStore.register(this)
 }
 
 object Var {
-  def apply[T](name : String)(implicit variableStore : VariableStore, mf : scala.reflect.Manifest[T]) = 
-    variableStore.provideVar[T](name)(mf) 
+  def apply[T : TypeTag](name : String)(implicit variableStore : VariableStore) = 
+    variableStore.provideVar[T](name) 
 }
