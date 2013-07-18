@@ -8,8 +8,8 @@ import java.text.ParseException
 object TermParser extends JavaTokenParsers {
   def term(implicit variableStore : VariableStore) : Parser[Term[Any]] = (
       floatingPointNumber ^^ { s => 
-        try { new Constant[Any](s.toInt) } catch { case _ => 
-          try { new Constant[Any](s.toLong) } catch { case _ => 
+        try { new Constant[Any](s.toInt) } catch { case _ : NumberFormatException => 
+          try { new Constant[Any](s.toLong) } catch { case _ : NumberFormatException => 
             new Constant[Any](s.toDouble) }
         }
       }
