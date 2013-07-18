@@ -44,6 +44,7 @@ object VariableStoreSpec extends Specification {
       for (i <- 1 to 10) {
         vs.getFreshNameWithPrefix("X") must be equalTo("X4") 
       }
+      success
     }
   }
 }

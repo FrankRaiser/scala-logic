@@ -5,7 +5,7 @@ version := "0.1-SNAPSHOT"
 
 organization := "scala-logic"
 
-scalaVersion := "2.10.0"
+scalaVersion := "2.10.2"
 
 scalacOptions in ThisBuild ++= Seq(
   "-unchecked",
@@ -18,8 +18,8 @@ seq(ScctPlugin.instrumentSettings : _*)
 
 // specs2 library
 libraryDependencies ++= Seq(
-   "org.specs2" %% "specs2" % "1.13" % "test",
-   "org.scala-lang" % "scala-reflect" % "2.10.0",  
+   "org.specs2" %% "specs2" % "2.1" % "test",
+   "org.scala-lang" % "scala-reflect" % "2.10.1",  
    "junit" % "junit" % "4.7"
  )
 
