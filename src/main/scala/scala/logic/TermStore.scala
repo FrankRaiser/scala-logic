@@ -6,15 +6,15 @@ package scala.logic
  * variables from different variable stores.
  * @author Frank Raiser
  */
-class TermStore[T](val terms : List[Term[T]] = Nil) {
+class TermStore(val terms : List[Term[_]] = Nil) {
   
   def isEmpty = terms.isEmpty
   
-  def +(term : Term[T]) : TermStore[T] = new TermStore(term :: terms)
+  def +[T](term : Term[T]) : TermStore = new TermStore(term :: terms)
   
-  def -(term : Term[T]) : TermStore[T] = new TermStore(terms.filterNot(_ == term))
+  def -[T](term : Term[T]) : TermStore = new TermStore(terms.filterNot(_ == term))
   
-  def --(otherTerms : List[Term[T]]) : TermStore[T] = new TermStore(terms.filterNot(otherTerms.contains))
+  def --(otherTerms : List[Term[_]]) : TermStore = new TermStore(terms.filterNot(otherTerms.contains))
   
-  def ++(otherTerms : List[Term[T]]) : TermStore[T] = new TermStore(otherTerms ++ terms)
+  def ++(otherTerms : List[Term[_]]) : TermStore = new TermStore(otherTerms ++ terms)
 }

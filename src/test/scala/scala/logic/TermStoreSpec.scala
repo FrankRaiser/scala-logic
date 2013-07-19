@@ -18,10 +18,10 @@ object TermStoreSpec extends Specification {
     val c = Constant[Any]("c")
     val t = "f(a)".asTerm
     val fx = "f(X)".asTerm
-    val fb = "f(b)".asTerm
-    val terms = List(t, fx, fb)
-    val termStore = new TermStore[Any]
-    val fullStore = new TermStore[Any] ++ terms 
+    val fb : Term[_ <: Any] = "f(b)".asTerm
+    val terms : List[Term[_ <: Any]] = List(t, fx, fb)
+    val termStore = new TermStore
+    val fullStore = new TermStore ++ terms 
   }
   
   def notBeUnifiable = throwA[Exception].like { case ue : UnificationException[_] => 1 === 1 }
@@ -59,6 +59,12 @@ object TermStoreSpec extends Specification {
       store.terms must not contain(t)
       store.terms must not contain(fx)
       store.terms must haveSize(terms.size - 2)
+    }
+    
+    "allow binding variables" in new data {
+      val store = termStore + fx
+      x =:= b
+      store.terms.head.substituted.equals(fb) must beTrue 
     }
   }
 }
