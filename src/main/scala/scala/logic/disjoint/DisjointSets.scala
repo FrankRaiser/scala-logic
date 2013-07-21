@@ -17,13 +17,20 @@ import scala.annotation.tailrec
  * 
  * @author Frank Raiser
  */
-class DisjointSets[T](val nodes: Map[T, Node[T]] = Map.empty) {
+class DisjointSets[T](val nodes: Map[T, Node[T]] = Map.empty) extends Equals {
   
   private var compressedPaths : scala.collection.mutable.Map[T, T] = 
     scala.collection.mutable.Map.empty
   
+  def +(element : T) = add(element)
+  
   def add(element : T) : DisjointSets[T] =
     new DisjointSets(nodes + (element -> Node(element, 0, None)) )
+  
+  def ++(elements : Seq[T]) = addAll(elements)
+  
+  def addAll(elements : Seq[T]) : DisjointSets[T] =
+    new DisjointSets(nodes ++ elements.map(e => e -> Node(e, 0, None)) )
 
   private def createDisjointSetsWithUpdatedNodesAndCompressedPaths(
       updates : List[(Node[T], Node[T])]) : DisjointSets[T] = {
@@ -98,6 +105,22 @@ class DisjointSets[T](val nodes: Map[T, Node[T]] = Map.empty) {
   lazy val numberOfDisjointSets = nodes.values.count(_.parent == None)
   
   lazy val size = numberOfDisjointSets
+  
+  def canEqual(other: Any) = {
+    other.isInstanceOf[scala.logic.disjoint.DisjointSets[T]]
+  }
+  
+  override def equals(other: Any) = {
+    other match {
+      case that: scala.logic.disjoint.DisjointSets[T] => that.canEqual(DisjointSets.this) && nodes == that.nodes
+      case _ => false
+    }
+  }
+  
+  override def hashCode() = {
+    val prime = 41
+    prime + nodes.hashCode
+  }
 }
 
 object DisjointSets {

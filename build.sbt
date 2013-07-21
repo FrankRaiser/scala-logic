@@ -20,6 +20,7 @@ seq(ScctPlugin.instrumentSettings : _*)
 libraryDependencies ++= Seq(
    "org.specs2" %% "specs2" % "2.1" % "test",
    "org.scala-lang" % "scala-reflect" % "2.10.1",  
+   "org.scalaz" %% "scalaz-core" % "7.0.2",
    "junit" % "junit" % "4.7"
  )
 
