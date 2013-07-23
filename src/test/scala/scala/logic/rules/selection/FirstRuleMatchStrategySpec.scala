@@ -5,7 +5,6 @@ import org.junit.runner.RunWith
 import org.specs2.runner.JUnitRunner
 import org.specs2.specification.Scope
 import scala.logic.exception.UnificationException
-import scala.logic.VariableStore
 import scala.logic.state.TermState
 import scala.logic.rules.PrologRule
 import scala.logic._
@@ -16,8 +15,6 @@ import scala.logic.state.State
 @RunWith(classOf[JUnitRunner])
 object FirstRuleMatchStrategySpec extends Specification {
   trait data extends Scope {
-    implicit val variableStore = new VariableStore
-    
     val ouT = new FirstRuleMatchStrategy with State.Terms with Rule.Prolog {}
     
     val fx = "f(X)".asTerm
@@ -30,7 +27,7 @@ object FirstRuleMatchStrategySpec extends Specification {
     val rules = List(rule1)
   }
     
-  def notBeUnifiable = throwA[Exception].like { case ue : UnificationException[_] => 1 === 1 }
+  def notBeUnifiable = throwA[Exception].like { case ue : UnificationException => 1 === 1 }
   def beUnifiable = throwA[Throwable].not
 
   "The first rule match strategy" should {

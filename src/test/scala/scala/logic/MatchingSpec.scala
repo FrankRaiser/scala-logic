@@ -8,7 +8,7 @@ import scala.logic.exception.UnificationException
 
 @RunWith(classOf[JUnitRunner])
 object MatchingSpec extends Specification {
-  trait data extends Scope {
+  /*trait data extends Scope {
     implicit val variableStore = new VariableStore
     val x = Var[Any]("X")
     val y = Var[Any]("Y")
@@ -169,5 +169,5 @@ object MatchingSpec extends Specification {
         TermParser.parse("f(a,b,c)") := TermParser.parse("f(a,b,X)")
       }
     }
-  }
+  }*/
 }

@@ -7,9 +7,9 @@ import scala.logic.Term
  * @author Frank Raiser
  */
 trait Rule {
-  def head : Seq[Term[_]]
-  def body : Seq[Term[_]]
-  def guard : Seq[Term[_]]
+  def head : Seq[Term]
+  def body : Seq[Term]
+  def guard : Seq[Term]
 }
 
 object Rule {

@@ -3,9 +3,8 @@ scala-logic
 
 scala-logic is a library for logic variables and quantifier-free formulae support in Scala. 
 
-The library supports typed logic variables, general terms, matching, and unification. It does not
-add a full-fledged Prolog-like search engine or constraint solving engine, but rather acts
-as a core library if one wanted to implement these. (But part of this may be added in the future.)
+The library currently supports logic variables, general terms, matching, and unification.
+Planned for the future are various execution semantics (for example a Prolog-like search).
 
 Tests and Coverage [![Build Status](https://travis-ci.org/FrankRaiser/scala-logic.png)](https://travis-ci.org/FrankRaiser/scala-logic)
 ----
@@ -14,11 +13,59 @@ The library is fully tested via [specs2](http://etorreborre.github.com/specs2/) 
 automatically checked on different Scala and JDK versions on [Travis](http://travis-ci.org).
 
 Test coverage is computed with the [Scala Code Coverage Tool](http://mtkopone.github.com/scct/) and
-is kept at 100%. 
+is trying to be close to 100%. 
 
 Usage
 =====
 
+Unification
+----
+
+To perform unification you need a state as context and two terms, which you want to unify.
+You can use the TermParser and available implicits to quickly generate the corresponding Term structures:
+
+    import scala.logic._
+    import scala.logic.state.TermState
+    import scala.logic.unification.Unifier
+    
+    // create an empty state
+    val state = new TermState(Nil)
+    
+    // create the terms
+    val term1 = "f(a, b, g(X), Y)".asTerm
+    val term2 = "f(X, b, Y, g(a))".asTerm
+    val term3 = "f(a, X, Y, g(b))".asTerm
+    
+    // add the newly created variables to the state
+    state.addAllVariables(term1.variables ++ term2.variables)
+    
+    // perform the unification - result is a scalaz Validation
+    val result = Unifier.unify(term1, term2, state)
+    
+    result.toOption != None // check that it worked - true
+    val stateAfter = result.toOption.get // new state with bindings
+    
+    stateAfter.boundTerm("X".asTerm) == Some("a".asTerm) // X is bound to a
+    
+    // other unification calls:
+    Unifier.unify(term1, term3, stateAfter) // fails as X = a
+    Unifier.unify(term1, term3, state) // succeeds and binds X = b in new result state
+
+Concepts
+=====
+
+States
+----
+
+A state holds terms and logic variables and keeps track of their bindings. In addition to that, states
+may have additional information depending on the targeted semantics. The simplest available state is
+a TermState, which simply keeps a list of terms.
+
+States provide a context for unification operations and if you have created variables as part of some
+terms, you may need to add them to the state as follows:
+    
+    myState.addVariables(List(x, y, z))
+    
 Logic Variables
 ----
 

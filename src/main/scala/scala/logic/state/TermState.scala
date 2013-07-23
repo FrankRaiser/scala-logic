@@ -1,11 +1,8 @@
 package scala.logic.state
 
-import scala.logic.TermStore
 import scala.logic.Term
 import scala.logic.disjoint.DisjointSets
 import scala.logic.Var
-import unification.Unifier
-import scala.logic.exception.UnificationException
 
 /**
  * A simple state, which holds a list of terms.
@@ -13,16 +10,16 @@ import scala.logic.exception.UnificationException
  * @author Frank Raiser
  */
 case class TermState(
-    val terms : List[Term[_]], 
+    val terms : List[Term], 
     val variableBindings : State.VariableBinding = Map.empty,
-    val disjointSets : DisjointSets[Var[Any]] = new DisjointSets[Var[Any]](Map.empty)) extends State { 
+    val disjointSets : DisjointSets[Var] = new DisjointSets[Var](Map.empty)) extends State { 
   
-  def bind(variable : Var[Any], term : Term[Any]) : State = term match {
-    case v : Var[Any] => TermState(terms, variableBindings, disjointSets.union(variable, v))
+  def bind(variable : Var, term : Term) : State = term match {
+    case v : Var => TermState(terms, variableBindings, disjointSets.union(variable, v))
     case _ => TermState(terms, variableBindings + (variable -> term), disjointSets)
   }
   
-  def addVariables(variables : Seq[Var[Any]]) =
+  def addVariables(variables : Seq[Var]) =
     TermState(terms, variableBindings, disjointSets ++ variables)
     
 }

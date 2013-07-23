@@ -5,10 +5,9 @@ import org.junit.runner.RunWith
 import org.specs2.runner.JUnitRunner
 import org.specs2.specification.Scope
 import scala.logic.exception.UnificationException
-import scala.logic.VariableStore
 import scala.logic._
-import unification.Unifier
 import org.specs2.matcher.MatchResult
+import scala.logic.unification.Unifier
 
 @RunWith(classOf[JUnitRunner])
 trait UnificationSpec[T <: State] extends Specification {
@@ -16,26 +15,24 @@ trait UnificationSpec[T <: State] extends Specification {
   def emptyState : T
   
   trait data extends Scope {
-    implicit val variableStore = new VariableStore
-    
-    val x = Var[Any]("X")
-    val y = Var[Any]("Y")
-    val z = Var[Any]("Y")
-    val a = Constant[Any]("a")
-    val b = Constant[Any]("b")
+    val x = new Var("X")
+    val y = new Var("Y")
+    val z = new Var("Y")
+    val a = new Constant("a")
+    val b = new Constant("b")
     
     def emptyStateX = emptyState.addVariables(List(x))
     def emptyStateXY = emptyState.addVariables(List(x,y))
     def emptyStateAllVars = emptyState.addVariables(List(x,y,z))
   }
     
-  def notBeUnifiable = throwA[Exception].like { case ue : UnificationException[_] => 1 === 1 }
+  def notBeUnifiable = throwA[Exception].like { case ue : UnificationException => 1 === 1 }
   def beUnifiable = throwA[Throwable].not
   
-  def noUnify(term1 : String, term2 : String)(implicit varStore : VariableStore) : MatchResult[Option[Unifier.UnificationContext]] = 
-    noUnify(term1, term2, emptyState)(varStore)
+  def noUnify(term1 : String, term2 : String) : MatchResult[Option[Unifier.UnificationContext]] = 
+    noUnify(term1, term2, emptyState)
   
-  def noUnify(term1 : String, term2 : String, context : State)(implicit varStore : VariableStore) 
+  def noUnify(term1 : String, term2 : String, context : State) 
       : MatchResult[Option[Unifier.UnificationContext]] = {
     Unifier.unify(term1.asTerm, term2.asTerm, context).toOption must beNone
     Unifier.unify(term2.asTerm, term1.asTerm, context).toOption must beNone
@@ -160,6 +157,9 @@ trait UnificationSpec[T <: State] extends Specification {
         context.disjointSets.find(x) must be equalTo(context.disjointSets.find(y))
         context.boundTerm(x) must beNone
         context.boundTerm(y) must beNone
+      }
+      "not unify X if it was not registered with state" in new data {
+        noUnify("X", "a", emptyState)
       }
     }
     "support occur check and " >> {

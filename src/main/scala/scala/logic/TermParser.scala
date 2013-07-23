@@ -4,52 +4,47 @@ import scala.util.parsing.combinator.syntactical.StandardTokenParsers
 import scala.util.parsing.combinator.RegexParsers
 import scala.util.parsing.combinator.JavaTokenParsers
 import java.text.ParseException
+import scala.logic.state.State
 
 object TermParser extends JavaTokenParsers {
-  def term(implicit variableStore : VariableStore) : Parser[Term[Any]] = (
-      floatingPointNumber ^^ { s => 
-        try { new Constant[Any](s.toInt) } catch { case _ : NumberFormatException => 
-          try { new Constant[Any](s.toLong) } catch { case _ : NumberFormatException => 
-            new Constant[Any](s.toDouble) }
-        }
-      }
+  def term : Parser[Term] = (
+      floatingPointNumber ^^ { s => new Constant(s) }
+      // TODO unify term parsing into one expression
     | ident ~ """\(""".r ~ term <~ """\)""".r ^^ {s =>
-        new Term1[Any, Any]() {
+        new Term() {
           val symbol = s._1._1
-          val arg1 = s._2
+          val arity = 1
+          val arguments = List(s._2)
         }
       }
     | ident ~ """\(""".r ~ term ~ """,""".r ~ term <~ """\)""".r ^^ {s =>
-        new Term2[Any, Any, Any]() {
+        new Term() {
+          val arity = 2
           val symbol = s._1._1._1._1
-          val arg1 = s._1._1._2
-          val arg2 = s._2
+          val arguments = List(s._1._1._2, s._2)
         }
       }
     | ident ~ """\(""".r ~ term ~ """,""".r ~ term ~ """,""".r ~ term <~ """\)""".r ^^ {s =>
-        new Term3[Any, Any, Any, Any]() {
+        new Term() {
+          val arity = 3
           val symbol = s._1._1._1._1._1._1
-          val arg1 = s._1._1._1._1._2
-          val arg2 = s._1._1._2
-          val arg3 = s._2
+          val arguments = List(s._1._1._1._1._2, s._1._1._2, s._2)
         }
       }
-    | """[A-Z]""".r ~ opt(ident) ^^ { s =>
-      variableStore.provideVar[Any]("" + s._1 + s._2.getOrElse(""))
-      }
-    | ident ^^ { s => new Constant[Any](s)} 
+    | """[A-Z]""".r ~ opt(ident) ^^ { s => new Var(s._1 + s._2.getOrElse("")) }
+    | ident ^^ { s => new Constant(s) } 
   )
   
-  def parse(s : String)(implicit variableStore : VariableStore) : Term[Any] =
+  def parse(s : String) : Term =
     /* Parsing is synchronized due to a bug in the Scala parser combinators
      * making them non-thread-safe, which would lead to occasional NPEs otherwise
      */
     synchronized {
-      this.parseAll(term(variableStore), s).get
+      this.parseAll(term, s).get
     }
 }
 
 class TermBuilder(s : String) {
-  def asTerm(implicit variableStore : VariableStore) : Term[Any] = 
-    TermParser.parse(s)(variableStore)
+  def asTerm : Term = 
+    TermParser.parse(s)
 }

@@ -2,5 +2,5 @@ package scala.logic.exception
 
 import scala.logic.Term
 
-class MatchingException[T](reason : String, term1 : Term[T], term2 : Term[T]) 
+class MatchingException(reason : String, term1 : Term, term2 : Term) 
 	extends UnificationException(reason, term1, term2)

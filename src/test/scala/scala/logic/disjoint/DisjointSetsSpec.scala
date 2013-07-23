@@ -16,12 +16,16 @@ object DisjointSetsSpec extends Specification {
     "be empty initially" in {
       DisjointSets().size must be equalTo(0)
     }
+    "not be equal to set with same content" in new data {
+      ds must not be equalTo((1 to 5).toSet)
+    }
     "take initial elements" in {
       DisjointSets(1 to 10).size must be equalTo(10)
     }
     "return element itself for non-unioned elements" in new data {
       for (i <- 1 to 5) ds.find(i) must beEqualTo(Some(i))
       ds.add(6).find(6) must be equalTo(Some(6))
+      (ds + 6).find(6) must be equalTo(Some(6))
     }
     "return None for elements not in the disjoint sets" in new data {
       ds.find(0) must beNone

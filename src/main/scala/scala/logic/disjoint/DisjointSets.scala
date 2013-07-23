@@ -113,7 +113,7 @@ class DisjointSets[T](val nodes: Map[T, Node[T]] = Map.empty) extends Equals {
   override def equals(other: Any) = {
     other match {
       case that: scala.logic.disjoint.DisjointSets[T] => that.canEqual(DisjointSets.this) && nodes == that.nodes
-      case _ => false
+      case _ => false // covered, but not detected by scct due to a bug :(
     }
   }
   
