@@ -5,6 +5,10 @@ import scala.logic.disjoint.DisjointSets
 import scala.logic._
 import scala.logic.exception.UnificationException
 import scalaz._
+import scala.logic.exception.UnificationException
+import scala.logic.exception.UnificationException
+import scala.logic.exception.UnificationException
+import scala.logic.exception.UnificationException
 
 /**
  * The Unifier object implements unification of arbitrary terms, based
@@ -31,6 +35,12 @@ object Unifier {
     case _ => unifyTerm(term1, term2, context)
   }
   
+  def matchTerms(term1 : Term, term2 : Term, context : UnificationContext) : UnificationResult = term1 match {
+    case v : Var => unifyVar(v, term2, context)
+    case c : Constant => unifyConstant(c, term2, context)
+    case _ => matchTerm(term1, term2, context) 
+  } 
+  
   private def unifyVar(var1 : Var, term2 : Term, context : UnificationContext) : UnificationResult =
     context.disjointSets.find(var1) match {
       case None => new UnificationException("Variable not found in DisjointSet of context", var1, term2).fail  
@@ -44,12 +54,13 @@ object Unifier {
     }
   
   private def unifyConstant(c : Constant, term2 : Term, context : UnificationContext) : UnificationResult = term2 match {
-    case d : Constant if c.value == d.value => context.success
+    case d : Constant if c == d => context.success
     case d : Constant => new UnificationException("Constants differ", c, d).fail
     case _ => new UnificationException("Cannot unify constant with second term", c, term2).fail
   }
   
-  private def unifyTerm(term1 : Term, term2 : Term, context : UnificationContext) : UnificationResult = term2 match {
+  private def unifyTerm(term1 : Term, term2 : Term, context : UnificationContext,
+      recursiveCall : (Term, Term, UnificationContext) => UnificationResult = unify) : UnificationResult = term2 match {
     case c : Constant => new UnificationException("non-constant Term and constant cannot be unified", term1, term2).fail
     case v : Var => unifyVar(v, term1, context)
     case t : Term if term1.arity != t.arity =>
@@ -61,16 +72,25 @@ object Unifier {
       def foldedUnify(res : UnificationResult, terms : (Term, Term)) : UnificationResult =
         for { 
           c <- res
-          res <- unify(terms._1, terms._2, c)
+          res <- recursiveCall(terms._1, terms._2, c)
         } yield res
 
       val initial : UnificationResult = context.success
       argsZipped.foldLeft(initial)(foldedUnify)
   }
   
+  private def matchTerm(term1 : Term, term2 : Term, context : UnificationContext) : UnificationResult = term2 match {
+    case v : Var => v.getTerm(context) match {
+      case None => new UnificationException("A term cannot be matched to an unbound variable", term1, v).fail
+      case Some(boundTerm) => matchTerms(term1, boundTerm, context)
+    }
+    case _ => unifyTerm(term1, term2, context, matchTerms)
+  }
+  
   private def unifyVarConstant(rootVar : Var, c : Constant, context : UnificationContext) : UnificationResult = 
       context.boundTerm(rootVar) match {
     case None => context.bind(rootVar, c).success
-    case Some(t) => unifyConstant(c, t, context) // recursion into bound term
+    case Some(t) if t == c => context.success
+    case _ => new UnificationException("Term bound to var is not same constant", rootVar, c).fail
   }
 }

@@ -25,18 +25,14 @@ trait UnificationSpec[T <: State] extends Specification {
     def emptyStateXY = emptyState.addVariables(List(x,y))
     def emptyStateAllVars = emptyState.addVariables(List(x,y,z))
   }
-    
-  def notBeUnifiable = throwA[Exception].like { case ue : UnificationException => 1 === 1 }
-  def beUnifiable = throwA[Throwable].not
   
-  def noUnify(term1 : String, term2 : String) : MatchResult[Option[Unifier.UnificationContext]] = 
-    noUnify(term1, term2, emptyState)
-  
-  def noUnify(term1 : String, term2 : String, context : State) 
-      : MatchResult[Option[Unifier.UnificationContext]] = {
-    Unifier.unify(term1.asTerm, term2.asTerm, context).toOption must beNone
-    Unifier.unify(term2.asTerm, term1.asTerm, context).toOption must beNone
+  def noUnify(term1 : String, term2 : String, context : State = emptyState) = {
+    Unifier.unify(term1.asTerm, term2.asTerm, context).toOption must beNone and
+    (Unifier.unify(term2.asTerm, term1.asTerm, context).toOption must beNone)
   }
+  
+  def noMatch(term1 : String, term2 : String, context : State = emptyState) =
+    Unifier.matchTerms(term1.asTerm, term2.asTerm, context).toOption must beNone
 
   "Unification in state context" should {
     "support constants and" >> {
@@ -56,6 +52,20 @@ trait UnificationSpec[T <: State] extends Specification {
 	  }
 	  "not unify a = f(b)" in new data {
 	    noUnify("a", "f(b)")
+	  }
+	  "match a = a" in new data {
+	    Unifier.matchTerms(a, a, emptyState).toOption must beSome
+	  }
+	  "not match a = b" in new data {
+	    noMatch("a", "b")
+	  }
+	  "match x = a" in new data {
+	    val res = Unifier.matchTerms(x, a, emptyStateX)
+	    res.toOption must beSome
+	    res.toOption.flatMap(_.boundTerm(x)) must be equalTo(Some(a))
+	  }
+	  "not match a = f(b)" in new data {
+	    noMatch("a", "f(b)")
 	  }
     }
     "support terms of arity 1 and" >> {
@@ -80,6 +90,31 @@ trait UnificationSpec[T <: State] extends Specification {
         val res = Unifier.unify("f(a)".asTerm, x, emptyStateX)
         res.toOption must beSome
         res.toOption.flatMap(_.boundTerm(x)) must be equalTo(Some("f(a)".asTerm))
+      }
+      "match f(a) and f(a) without changing state" in new data {
+        val res = Unifier.matchTerms("f(a)".asTerm, "f(a)".asTerm, emptyState)
+        res.toOption must beSome
+        res.toOption must be equalTo(Some(emptyState))
+      }
+      "not match f(a) and a" in {
+        noMatch("f(a)", "a")
+      }
+      "not match terms of different arity" in {
+        noMatch("f(a)", "f(a,a)")
+      }
+      "not match terms with different symbols" in {
+        noMatch("f(a)", "g(a)")
+      }
+      "not match f(a) and f(b)" in {
+        noMatch("f(a)", "f(b)")
+      }
+      "not match f(a) and X for unbound X" in new data{
+        noMatch("f(a)", "X", emptyStateX)
+      }
+      "match f(a) and X for X=f(a)" in new data {
+        val res = Unifier.unify(x, "f(a)".asTerm, emptyStateX)
+        res.toOption must beSome
+        Unifier.matchTerms("f(a)".asTerm, x, res.toOption.get).toOption must beSome
       }
     }
     "support terms of arity 2 and" >> {
@@ -161,6 +196,29 @@ trait UnificationSpec[T <: State] extends Specification {
       "not unify X if it was not registered with state" in new data {
         noUnify("X", "a", emptyState)
       }
+      "not match X if it was not registered with state" in {
+        noMatch("X", "a", emptyState)
+      }
+      "match X = Y for unbound X and Y" in new data {
+        Unifier.matchTerms(x, y, emptyStateXY).toOption must beSome
+      }
+      "match X = Y for unbound X and Y=a" in new data {
+        val res = Unifier.unify(y, a, emptyStateXY)
+        res.toOption must beSome
+        Unifier.matchTerms(x, y, res.toOption.get).toOption must beSome
+      }
+      "match X = a" in new data {
+        Unifier.matchTerms(x, a, emptyStateX).toOption must beSome
+      }
+      "not match a = X" in new data {
+        noMatch("a", "X", emptyStateX)
+      }
+      "match f(X,X) and f(a, a)" in new data {
+        Unifier.matchTerms("f(X,X)".asTerm, "f(a, a)".asTerm, emptyStateX).toOption must beSome
+      }
+      "not match f(X,X) and f(a,b)" in new data {
+        noMatch("f(X,X)", "f(a,b)", emptyStateX)
+      }
     }
     "support occur check and " >> {
       "not unify X = f(X)" in new data {
@@ -174,6 +232,9 @@ trait UnificationSpec[T <: State] extends Specification {
       }
       "not unify X = f(a, g(h(b, X), c))" in new data {
         noUnify("X", "f(a, g(h(b, X), c))", emptyStateX)
+      }
+      "not match X and f(X)" in new data {
+        noMatch("X", "f(X)", emptyStateX)
       }
     }
     "support keeping track of variable bindings and" >> {

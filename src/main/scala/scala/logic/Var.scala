@@ -1,7 +1,5 @@
 package scala.logic
 
-import scala.logic.exception.UnificationException
-import scala.logic.exception.MatchingException
 import scala.reflect.runtime.universe._
 import scala.logic.state.State
 
