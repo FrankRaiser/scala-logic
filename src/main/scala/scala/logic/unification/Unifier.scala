@@ -36,20 +36,24 @@ object Unifier {
   }
   
   def matchTerms(term1 : Term, term2 : Term, context : UnificationContext) : UnificationResult = term1 match {
-    case v : Var => unifyVar(v, term2, context)
+    case v : Var => unifyVar(v, term2, context, matchTerms)
     case c : Constant => unifyConstant(c, term2, context)
     case _ => matchTerm(term1, term2, context) 
   } 
   
-  private def unifyVar(var1 : Var, term2 : Term, context : UnificationContext) : UnificationResult =
+  private def unifyVar(var1 : Var, term2 : Term, context : UnificationContext,
+      recursiveCall : (Term, Term, UnificationContext) => UnificationResult = unify) : UnificationResult =
     context.disjointSets.find(var1) match {
       case None => new UnificationException("Variable not found in DisjointSet of context", var1, term2).fail  
       case Some(rootVar) => term2 match {
         case c : Constant => unifyVarConstant(rootVar, c, context)
         case v2 : Var if var1 == v2 => context.success
         case t : Term if t.occurs(rootVar) =>
-          new UnificationException("Variable must not occur in bound term", var1, term2).fail
-        case _ => context.bind(rootVar, term2).success
+          new UnificationException("Variable must not occur in bound term", var1, term2).fail 
+        case _ => context.boundTerm(rootVar) match {
+          case Some(boundTerm) => recursiveCall(boundTerm, term2, context)
+          case None => context.bind(rootVar, term2).success
+        }
       }
     }
   

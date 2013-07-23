@@ -250,5 +250,14 @@ trait UnificationSpec[T <: State] extends Specification {
         context.boundTerm(y) must be equalTo(Some(a))
       } 
     }
+    "support readme example" in new data {
+      val term1 = "f(a, g(X), Y)".asTerm
+      val term2 = "f(a, Y, g(a))".asTerm
+      val res = Unifier.unify(term1, term2, emptyStateXY)
+      res.toOption must beSome
+      val stateAfter = res.toOption.get
+      stateAfter.boundTerm(new Var("Y")).get.substituted(stateAfter) must be equalTo("g(a)".asTerm)
+      stateAfter.boundTerm(new Var("X")) must be equalTo(Some("a".asTerm))
+    }
   }
 }
