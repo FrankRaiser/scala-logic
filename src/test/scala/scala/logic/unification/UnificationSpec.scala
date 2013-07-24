@@ -89,6 +89,17 @@ trait UnificationSpec[T <: State] extends Specification {
         res.toOption must beSome
         res.toOption.flatMap(_.boundTerm(x)) must be equalTo(Some("f(a)".asTerm))
       }
+      "unify a = X for unknown X" in new data {
+        val res = Unifier.unify("a".asTerm, x, emptyState)
+        res.toOption must beSome
+        res.toOption.flatMap(_.boundTerm(x)) must be equalTo(Some("a".asTerm))
+      }
+      "unify a = X for X bound to a" in new data {
+        Unifier.unify("a".asTerm, x, emptyStateX.bind(x, "a".asTerm)).toOption must beSome
+      }
+      "not unify a = X for X bound to b" in new data {
+        noUnify("a", "X", emptyStateX.bind(x, "b".asTerm))
+      }
       "match f(a) and f(a) without changing state" in new data {
         val res = Unifier.matchTerms("f(a)".asTerm, "f(a)".asTerm, emptyState)
         res.toOption must beSome

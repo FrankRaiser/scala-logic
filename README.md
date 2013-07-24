@@ -63,10 +63,10 @@ The only difference to unification is that matching will never bind an unbound v
 in the second term, i.e. matching is a one-sided unification, which can be seen from the
 following example:
 
-    scala> Unifier.unify("X".asTerm, "a".asTerm, state)
+    scala> Unifier.matchTerms("X".asTerm, "a".asTerm, state)
     res3: scala.logic.unification.Unifier.UnificationResult = Success(TermState(List(),Map(X -> a),scala.logic.disjoint.DisjointSets@b85fb7a8))
     
-    scala> Unifier.unify("a".asTerm, "X".asTerm, state)
+    scala> Unifier.matchTerms("a".asTerm, "X".asTerm, state)
     res4: scala.logic.unification.Unifier.UnificationResult = Failure(scala.logic.exception.UnificationException: Cannot unify constant with second term)
 
 Simplified Term Construction

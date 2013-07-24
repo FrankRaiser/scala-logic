@@ -50,7 +50,15 @@ trait StateSpec[T <: State] extends Specification {
       val res = state.bind(x, "a".asTerm)
       res.clear.boundTerm(x) must be equalTo(Some("a".asTerm))
     }
-    
+    "create variable bindings for unknown variables X=Y" in {
+      val x = new Var("X")
+      val y = new Var("Y")
+      val res = emptyState.bind(x,y)
+      res.boundTerm(x) must beNone
+      res.boundTerm(y) must beNone
+      val boundRes = res.bind(x, "a".asTerm)
+      boundRes.boundTerm(y) must be equalTo(Some("a".asTerm))
+    }
     "retrieve a contained term for exact match" in new data {
       state.findTermsThatMatch(fa) must haveSize(1)
     }
@@ -58,8 +66,8 @@ trait StateSpec[T <: State] extends Specification {
       val boundState = (emptyState ++ List("f(Y)".asTerm)).bind(new Var("Y"), "a".asTerm)
       boundState.findTermsThatMatch("f(a)".asTerm) must haveSize(1)
     }
-    "not retrieve f(a) when matching f(y)" in new data {
-      state.findTermsThatMatch("f(Y)".asTerm) must beEmpty
+    "not retrieve f(Y) when matching f(a)" in new data {
+      (emptyState ++ List("f(Y)".asTerm)).findTermsThatMatch("f(a)".asTerm) must beEmpty
     }
     "support regression cases" >> {
       "find term f(X) for X=a to match f(a)" in {

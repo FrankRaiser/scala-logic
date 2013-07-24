@@ -52,7 +52,7 @@ trait State {
       (math.abs(Random.nextInt) % math.pow(10, State.RANDOM_SUFFIX_LENGTH).toInt))
       
     var name : String = ""
-    val variables = allVariables.toList
+    val variables = allVariables.map(_.name).toList
     do {
       name = prefix + getRandomSuffix
     } 
