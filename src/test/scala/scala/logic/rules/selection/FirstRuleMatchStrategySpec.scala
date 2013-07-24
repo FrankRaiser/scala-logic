@@ -19,8 +19,8 @@ object FirstRuleMatchStrategySpec extends Specification {
     
     val fx = "f(X)".asTerm
     
-    val emptyState = TermState(Nil)
-    val state = TermState(List(fx))
+    val emptyState = new TermState(Nil)
+    val state = new TermState(List(fx))
     
     val rule1 = new PrologRule(fx, Nil)
     
@@ -40,6 +40,7 @@ object FirstRuleMatchStrategySpec extends Specification {
     }
     
     "find the only available rule" in new data {
+      skipped("Not implemented yet")
       ouT.selectRule (state, List(rule1)) must be equalTo(Some(rule1))
     }
   }
