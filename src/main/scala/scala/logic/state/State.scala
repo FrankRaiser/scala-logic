@@ -24,11 +24,25 @@ trait State {
   
   def allVariables = disjointSets.nodes.keys
   
+  def findTermsThatMatch(otherTerm : Term) : Stream[Term] 
+  
   def boundTerm(variable : Var) : Option[Term] = 
     disjointSets.find(variable) flatMap variableBindings.get
+
+  /** A size measure of the state */
+  def size : Int
     
   /** extends the state by an additional binding */
   def bind(variable : Var, term : Term) : State
+  
+  /** add new terms */
+  def ++ (terms : Seq[Term]) : State
+  
+  /** remove terms */
+  def -- (terms : Seq[Term]) : State
+  
+  /** remove all terms (but keep variable bindings) */
+  def clear : State
   
   /** adds the given variables to the state's DisjointSets */
   def addVariables(variables : Seq[Var]) : State

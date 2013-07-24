@@ -1,13 +1,11 @@
-package scala.logic.state
+package scala.logic.unification
 
 import org.specs2.mutable.Specification
 import org.junit.runner.RunWith
-import org.specs2.runner.JUnitRunner
 import org.specs2.specification.Scope
-import scala.logic.exception.UnificationException
 import scala.logic._
-import org.specs2.matcher.MatchResult
-import scala.logic.unification.Unifier
+import scala.logic.state.State
+import org.specs2.runner.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
 trait UnificationSpec[T <: State] extends Specification {
@@ -116,6 +114,16 @@ trait UnificationSpec[T <: State] extends Specification {
         res.toOption must beSome
         Unifier.matchTerms("f(a)".asTerm, x, res.toOption.get).toOption must beSome
       }
+      "unify f(X) and f(a) and bind X=a" in {
+        val res = Unifier.unify("f(X)".asTerm, "f(a)".asTerm, emptyState)
+        res.toOption must beSome
+        res.toOption.get.boundTerm(new Var("X")) must be equalTo(Some("a".asTerm))
+      }
+      "match f(X) and f(a) and bind X=a" in {
+        val res = Unifier.matchTerms("f(X)".asTerm, "f(a)".asTerm, emptyState)
+        res.toOption must beSome
+        res.toOption.get.boundTerm(new Var("X")) must be equalTo(Some("a".asTerm))
+      }
     }
     "support terms of arity 2 and" >> {
       "unify f(a,b) = f(a,b) without changing state" in new data {
@@ -178,6 +186,11 @@ trait UnificationSpec[T <: State] extends Specification {
         res.toOption must beSome
         res.toOption.flatMap(_.boundTerm(x)) must be equalTo(Some(a))
       }
+      "bind a = X" in new data {
+        val res = Unifier.unify(a, x, emptyStateX)
+        res.toOption must beSome
+        res.toOption.flatMap(_.boundTerm(x)) must be equalTo(Some(a))
+      }
       "not unify X multiple times with different constants" in new data {
         val res = for {
             c1 <- Unifier.unify(x, a, emptyStateX)
@@ -193,12 +206,6 @@ trait UnificationSpec[T <: State] extends Specification {
         context.boundTerm(x) must beNone
         context.boundTerm(y) must beNone
       }
-      "not unify X if it was not registered with state" in new data {
-        noUnify("X", "a", emptyState)
-      }
-      "not match X if it was not registered with state" in {
-        noMatch("X", "a", emptyState)
-      }
       "match X = Y for unbound X and Y" in new data {
         Unifier.matchTerms(x, y, emptyStateXY).toOption must beSome
       }
@@ -212,6 +219,9 @@ trait UnificationSpec[T <: State] extends Specification {
       }
       "not match a = X" in new data {
         noMatch("a", "X", emptyStateX)
+      }
+      "match a = X if X bound to a" in new data {
+        Unifier.matchTerms(a, x, emptyStateX.bind(x, "a".asTerm)).toOption must beSome
       }
       "match f(X,X) and f(a, a)" in new data {
         Unifier.matchTerms("f(X,X)".asTerm, "f(a, a)".asTerm, emptyStateX).toOption must beSome

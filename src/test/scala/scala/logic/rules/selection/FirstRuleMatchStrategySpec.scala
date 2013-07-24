@@ -4,7 +4,6 @@ import org.specs2.mutable.Specification
 import org.junit.runner.RunWith
 import org.specs2.runner.JUnitRunner
 import org.specs2.specification.Scope
-import scala.logic.exception.UnificationException
 import scala.logic.state.TermState
 import scala.logic.rules.PrologRule
 import scala.logic._
@@ -27,9 +26,6 @@ object FirstRuleMatchStrategySpec extends Specification {
     val rules = List(rule1)
   }
     
-  def notBeUnifiable = throwA[Exception].like { case ue : UnificationException => 1 === 1 }
-  def beUnifiable = throwA[Throwable].not
-
   "The first rule match strategy" should {
     "not find a rule in an empty ruleset" in new data {
       ouT.selectRule (emptyState, Nil) must beNone

@@ -36,15 +36,15 @@ object Unifier {
   }
   
   def matchTerms(term1 : Term, term2 : Term, context : UnificationContext) : UnificationResult = term1 match {
-    case v : Var => unifyVar(v, term2, context, matchTerms)
-    case c : Constant => unifyConstant(c, term2, context)
+    case v : Var => unifyVar(v, term2, context)
+    case c : Constant => matchConstant(c, term2, context)
     case _ => matchTerm(term1, term2, context) 
   } 
   
   private def unifyVar(var1 : Var, term2 : Term, context : UnificationContext,
       recursiveCall : (Term, Term, UnificationContext) => UnificationResult = unify) : UnificationResult =
     context.disjointSets.find(var1) match {
-      case None => new UnificationException("Variable not found in DisjointSet of context", var1, term2).fail  
+      case None => unifyVar(var1, term2, context.addVariables(List(var1)))  
       case Some(rootVar) => term2 match {
         case c : Constant => unifyVarConstant(rootVar, c, context)
         case v2 : Var if var1 == v2 => context.success
@@ -60,7 +60,22 @@ object Unifier {
   private def unifyConstant(c : Constant, term2 : Term, context : UnificationContext) : UnificationResult = term2 match {
     case d : Constant if c == d => context.success
     case d : Constant => new UnificationException("Constants differ", c, d).fail
+    case v : Var => v.getTerm(context) match {
+      case None => context.disjointSets.find(v) match {
+        case Some(rootVar) => unifyVarConstant(rootVar, c, context)
+        case None => unifyVarConstant(v, c, context.addVariables(List(v)))        
+      } 
+      case Some(boundTerm) => unifyConstant(c, boundTerm, context)
+    }
     case _ => new UnificationException("Cannot unify constant with second term", c, term2).fail
+  }
+  
+  private def matchConstant(c : Constant, term2 : Term, context : UnificationContext) : UnificationResult = term2 match {
+    case v : Var => v.getTerm(context) match {
+      case None => new UnificationException("Cannot match unbound variable to a constant", c, v).fail
+      case Some(boundTerm) => matchConstant(c, boundTerm, context)
+    }
+    case _ => unifyConstant(c, term2, context)
   }
   
   private def unifyTerm(term1 : Term, term2 : Term, context : UnificationContext,
