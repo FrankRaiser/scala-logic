@@ -66,8 +66,4 @@ object State {
   type VariableBinding = Map[Var, Term]
   
   val RANDOM_SUFFIX_LENGTH = 7
-  
-  trait Terms {
-    type StateType = TermState
-  }
 }

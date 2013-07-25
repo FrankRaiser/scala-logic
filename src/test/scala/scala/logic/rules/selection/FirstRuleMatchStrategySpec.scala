@@ -10,18 +10,21 @@ import scala.logic._
 import scala.logic.rules.Rule
 import scala.logic.state.TermState
 import scala.logic.state.State
+import scala.logic.rules.application.TermRewritingStrategy
+import scala.logic.rules.SimpleTermRule
 
 @RunWith(classOf[JUnitRunner])
 object FirstRuleMatchStrategySpec extends Specification {
+  val ouT = new FirstRuleMatchStrategy with Semantics.SimpleTerms with Semantics.TermRewriting {}
+  
   trait data extends Scope {
-    val ouT = new FirstRuleMatchStrategy with State.Terms with Rule.Prolog {}
     
     val fx = "f(X)".asTerm
     
     val emptyState = new TermState(Nil)
     val state = new TermState(List(fx))
     
-    val rule1 = new PrologRule(fx, Nil)
+    val rule1 = new SimpleTermRule(List(fx))
     
     val rules = List(rule1)
   }

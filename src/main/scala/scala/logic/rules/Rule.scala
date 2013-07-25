@@ -11,9 +11,3 @@ trait Rule {
   def body : Seq[Term]
   def guard : Seq[Term]
 }
-
-object Rule {
-  trait Prolog {
-    type RuleType = PrologRule
-  }
-}
