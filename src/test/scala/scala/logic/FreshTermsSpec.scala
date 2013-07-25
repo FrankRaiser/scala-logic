@@ -6,6 +6,7 @@ import org.specs2.runner.JUnitRunner
 import org.specs2.specification.Scope
 import scala.logic.exception.UnificationException
 import scala.logic.state.TermState
+import scala.logic.state.State
 
 @RunWith(classOf[JUnitRunner])
 object FreshTermsSpec extends Specification {
@@ -33,16 +34,18 @@ object FreshTermsSpec extends Specification {
         term.fresh must be equalTo(term)
       }
     }
-    "be a new unused variable for each time x.fresh is called" in new data {
-      implicit var context = new TermState(Nil)
+    "be a new unused variable for each time x.fresh is called" in {
+      implicit var context : State = new TermState(Nil)
+      val x = new Var("X")
       for (i <- 1 to 1000) {
         val fresh = x.fresh
         fresh must not be equalTo(x)
         context = context.addVariables(fresh.variables.toSeq)
         context.allVariables must haveSize(i)
       }
+      success
     }
-    "create fresh variable once for multiple occurences (f.ex. f(X,X))" in new data {
+    "create fresh variable once for multiple occurences (f.ex. f(X,X))" in {
       val fxx = "f(X,X)".asTerm
       implicit var context = new TermState(Nil).addVariables(fxx.variables.toSeq)
       val res = fxx.fresh
@@ -63,8 +66,8 @@ object FreshTermsSpec extends Specification {
       ny.name must not be equalTo("X")
       ny.name must not be equalTo("Y")
     }
-    "create fresh varnames for longer var names" in new data {
-      implicit var context = new TermState(Nil)
+    "create fresh varnames for longer var names" in {
+      implicit var context : State = new TermState(Nil)
       val name = "SomethingLongerThanUsualForAVariableName"
       val fresh = name.asTerm.fresh
       fresh.asInstanceOf[Var].name must not be equalTo(name)

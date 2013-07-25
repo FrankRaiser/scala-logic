@@ -16,6 +16,8 @@ scalacOptions in ThisBuild ++= Seq(
 
 seq(ScctPlugin.instrumentSettings : _*)
 
+org.scalastyle.sbt.ScalastylePlugin.Settings
+
 // specs2 library
 libraryDependencies ++= Seq(
    "org.specs2" %% "specs2" % "2.1" % "test",
