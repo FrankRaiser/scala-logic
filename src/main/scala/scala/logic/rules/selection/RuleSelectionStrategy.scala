@@ -13,7 +13,7 @@ import scala.logic.SemanticStrategy
  * 
  * @author Frank Raiser
  */
-trait RuleSelectionStrategy { self: SemanticStrategy =>
+trait RuleSelectionStrategy { 
   
   def ruleApplicationStrategy : RuleApplicationStrategy
   
@@ -25,5 +25,5 @@ trait RuleSelectionStrategy { self: SemanticStrategy =>
    * @return None if no rule is selectable, otherwise Some(rule) 
    * for with <code>applicationStrategy.isApplicable(rule, state)==true</code> 
    */
-  def selectRule(state : StateType, availableRules : List[RuleType]) : Option[RuleType]
+  def selectRule(state : State, availableRules : List[Rule]) : Option[Rule]
 }

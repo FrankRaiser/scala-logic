@@ -11,7 +11,8 @@ import scala.logic.SemanticStrategy
  * 
  * @author Frank Raiser
  */
-trait FirstRuleMatchStrategy extends RuleSelectionStrategy { self : SemanticStrategy =>
+trait FirstRuleMatchStrategy extends RuleSelectionStrategy {
   
-  def selectRule(store : StateType, availableRules : List[RuleType]): Option[RuleType] = None 
+  def selectRule(state : State, availableRules : List[Rule]): Option[Rule] =
+    availableRules.par.find(rule => ruleApplicationStrategy.isApplicable(rule, state)) 
 }

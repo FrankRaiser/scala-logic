@@ -19,14 +19,16 @@ object FirstRuleMatchStrategySpec extends Specification {
   
   trait data extends Scope {
     
-    val fx = "f(X)".asTerm
+    val fa = "f(a)".asTerm
     
     val emptyState = new TermState(Nil)
-    val state = new TermState(List(fx))
+    val state = new TermState(List(fa))
     
-    val rule1 = new SimpleTermRule(List(fx))
+    val rule1 = new SimpleTermRule(List(fa))
+    val rule2 = new SimpleTermRule(List("g(a)".asTerm))
+    val rule3 = new SimpleTermRule(List("f(a)".asTerm))
     
-    val rules = List(rule1)
+    val rules = List(rule2, rule1, rule3)
   }
     
   "The first rule match strategy" should {
@@ -39,8 +41,13 @@ object FirstRuleMatchStrategySpec extends Specification {
     }
     
     "find the only available rule" in new data {
-      skipped("Not implemented yet")
       ouT.selectRule (state, List(rule1)) must be equalTo(Some(rule1))
+    }
+    "select second rule, if first not applicable" in new data {
+      ouT.selectRule(state, List(rule2, rule1)) must be equalTo(Some(rule1))
+    }
+    "select first matching rule out of three" in new data {
+      ouT.selectRule (state, rules) must be equalTo(Some(rule1))
     }
   }
 }
