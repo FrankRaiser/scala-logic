@@ -3,7 +3,7 @@ package scala.logic.rules
 import scala.logic.Term
 import scala.language.existentials
 
-class PrologRule(val headPredicate : Term, val body : Seq[Term]) extends Rule {
+class HornClause(val headPredicate : Term, val body : Seq[Term] = Nil) extends Rule {
   val guard = Nil
   val head = List(headPredicate)
   

@@ -5,7 +5,7 @@ import org.junit.runner.RunWith
 import org.specs2.runner.JUnitRunner
 import org.specs2.specification.Scope
 import scala.logic.state.TermState
-import scala.logic.rules.PrologRule
+import scala.logic.rules.HornClause
 import scala.logic._
 import scala.logic.rules.Rule
 import scala.logic.state.TermState
@@ -15,7 +15,7 @@ import scala.logic.rules.SimpleTermRule
 
 @RunWith(classOf[JUnitRunner])
 object FirstRuleMatchStrategySpec extends Specification {
-  val ouT = new FirstRuleMatchStrategy with Semantics.SimpleTerms with Semantics.TermRewriting {}
+  val ouT = new FirstRuleMatchStrategy with Semantics.SimpleTerms with TermRewritingStrategy {}
   
   trait data extends Scope {
     

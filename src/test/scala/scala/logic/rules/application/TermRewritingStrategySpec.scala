@@ -11,10 +11,13 @@ import scala.logic.rules.SimpleTermRule
 import scala.logic.state.TermState
 import scala.logic.rules.SimpleTermRule
 import scala.logic.state.TermState
+import scala.logic.rules.HornClause
+import scala.logic.rules.HornClause
+import scala.logic.rules.HornClause
 
 @RunWith(classOf[JUnitRunner])
 object TermRewritingStrategySpec extends Specification {
-  val ouT : RuleApplicationStrategy = new TermRewritingStrategy with Semantics.SimpleTerms {}
+  val ouT = new TermRewritingStrategy {}
     
   trait data extends Scope {
     
@@ -25,15 +28,16 @@ object TermRewritingStrategySpec extends Specification {
     val state = new TermState(List(fx)).bind(x, "a".asTerm)
     
     val twoHeadedRule = new SimpleTermRule(List(fa, "f(b)".asTerm))
-    val removefaRule = new SimpleTermRule(List(fa))
-    val replacefagaRule = new SimpleTermRule(List("f(a)".asTerm), List("g(a)".asTerm))
-    val replacefgRule = new SimpleTermRule(List("f(Y)".asTerm), List("g(Y)".asTerm))
+    val removefaRule = new HornClause(fa)
+    val replacefagaRule = new HornClause(fa, List("g(a)".asTerm))
+    val replacefgRule = new HornClause("f(Y)".asTerm, List("g(Y)".asTerm))
   }
     
   "The term rewriting strategy" should {
-    "not be applicable to a rule with multiple head terms" in new data {
-      ouT.isApplicable(twoHeadedRule, state) must beFalse
-    }
+    // compile error due to wrong type - non horn clause rule
+//    "not be applicable to a rule with multiple head terms" in new data {
+//      ouT.isApplicable(twoHeadedRule, state) must beFalse
+//    }
     "f(a) must be applicable to rule f(a) -> T" in new data {
       ouT.isApplicable(removefaRule, new TermState(List(fa))) must beTrue
     }

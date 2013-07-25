@@ -13,12 +13,12 @@ import scala.logic.Semantics
  * 
  * @author Frank Raiser
  */
-trait TermRewritingStrategy extends RuleApplicationStrategy { self : Semantics.SimpleTerms =>
+trait TermRewritingStrategy extends RuleApplicationStrategy {
 
   def isApplicable(rule : Rule, state : State) : Boolean =
     rule.guard.isEmpty && rule.head.size == 1 && !state.findTermsThatMatch(rule.head.head).isEmpty
   
-  def applyRule(rule : Rule, state : State) : State= state.findTermsThatMatch(rule.head.head).headOption match {
+  def applyRule(rule : Rule, state : State) : State = state.findTermsThatMatch(rule.head.head).headOption match {
     case None => throw new RuntimeException("Rule is not applicable. Call isApplicable first!")
     case Some(term) => Unifier.matchTerms(rule.head.head, term, state).toOption match {
       case None => throw new RuntimeException("Rule is not applicable. Unexpected match error")

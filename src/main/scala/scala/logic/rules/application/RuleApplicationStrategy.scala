@@ -1,6 +1,7 @@
 package scala.logic.rules.application
 
 import scala.logic.state.State
+import scala.logic.SemanticStrategy
 import scala.logic.rules.Rule
 
 /**

@@ -2,8 +2,7 @@ package scala.logic.rules.selection
 
 import scala.logic.state.State
 import scala.logic.rules.Rule
-import scala.logic.SemanticStrategy
-import scala.logic.SemanticStrategy
+import scala.logic.rules.application.RuleApplicationStrategy
 
 /**
  * A simple strategy, which tries rules in their given order and selects
@@ -11,8 +10,8 @@ import scala.logic.SemanticStrategy
  * 
  * @author Frank Raiser
  */
-trait FirstRuleMatchStrategy extends RuleSelectionStrategy {
+trait FirstRuleMatchStrategy extends RuleSelectionStrategy { self : RuleApplicationStrategy =>
   
   def selectRule(state : State, availableRules : List[Rule]): Option[Rule] =
-    availableRules.par.find(rule => ruleApplicationStrategy.isApplicable(rule, state)) 
+    availableRules.par.find(rule => isApplicable(rule, state)) 
 }

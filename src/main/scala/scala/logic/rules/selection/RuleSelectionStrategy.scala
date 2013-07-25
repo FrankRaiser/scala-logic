@@ -3,7 +3,6 @@ package scala.logic.rules.selection
 import scala.logic.rules.Rule
 import scala.logic.state.State
 import scala.logic.rules.application.RuleApplicationStrategy
-import scala.logic.SemanticStrategy
 
 /**
  * A strategy for selecting a rule from a given collection of rules
@@ -13,9 +12,7 @@ import scala.logic.SemanticStrategy
  * 
  * @author Frank Raiser
  */
-trait RuleSelectionStrategy { 
-  
-  def ruleApplicationStrategy : RuleApplicationStrategy
+trait RuleSelectionStrategy { self : RuleApplicationStrategy =>
   
   /**
    * Select one of the available rules that can be applied to the given state, according
